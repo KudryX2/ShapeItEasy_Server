@@ -2,7 +2,7 @@
 
 Paquetes instalados y configuración
 
-npm init -y
+	npm init -y
 
 https://www.npmjs.com/package/ts-node
 
