@@ -3,13 +3,11 @@ const FS = require('fs');
 const HTTPS = require('https');
 const WebSocketServer = require('ws').Server;
 
-
-import {Helper} from "./Helper";					// Aux methods
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
-
+import {ScenesManager} from "./ScenesManager";
+import {UsersManager} from "./UsersManager";
 
 const DECODER = new TextDecoder();
-const ENCODER = new TextEncoder();
 
 
 const SERVER = HTTPS.createServer({					// Server
@@ -33,9 +31,6 @@ wss.on('connection', (ws : any) =>{
 });
 
 
-let clientsMap = new Map();
-
-
 function processRequest(data : BufferSource, socket : WebSocket) : void{ 
 
 	let dataString : string = DECODER.decode(data); 
@@ -52,45 +47,23 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 
 	if(parseOK){										// If parsed handle the request	
 		if(request.kind == 'requestUserToken')       		// Request user token
-			handleUserTokenRequest(socket, request);
+			UsersManager.handleUserTokenRequest(socket, request);
 	
+		else if(request.kind == 'requestScenesList')		// Scenes requests
+			ScenesManager.handleScenesListRequest(socket, request);
+
+		else if(request.kind == 'requestCreateScene')
+			ScenesManager.handleCreateSceneRequest(socket, request);
+
+		else if(request.kind == 'requestEditScene')
+			ScenesManager.handleEditSceneRequest(socket, request);
+
+		else if(request.kind == 'requestDeleteScene')
+			ScenesManager.handleDeleteSceneRequest(socket, request);
+
 		else                                           		// NOT DEFINED KIND
 			console.log('Petición de tipo desconocido ' + data.toString());
 
 	}
 
-}
-
-function writeToSocket(socket: WebSocket, kind:string, content:string){
-
-	let messageJSON : JSON = <JSON><unknown>{
-		'kind' : kind,
-		'content' : content
-	};
-
-	try{
-		socket.send(ENCODER.encode(JSON.stringify(messageJSON)));
-	}catch(exception){
-		console.log('Error escribiendo en el socket ' + exception);
-	}
-} 
-
-
-function handleUserTokenRequest(socket : WebSocket, request: Interfaces.Request){
-
-	let userCredentials = JSON.parse(request.content);
-	let token = "";
-
-	if(checkUserCredentials(userCredentials)){				// Check user credentials
-		token = Helper.generateRandomToken(10);             	// Create random token for the user
-		clientsMap.set(token, userCredentials.userName);    	// Save the token and user
-	}
-
-	writeToSocket(socket, 'tokenCallback', token);
-}
-
-function checkUserCredentials(credentials : Interfaces.UserCredentials) : boolean{
-	// TODO comprobar que el usuario existe y la contraseña coincide
-
-	return true;
 }
