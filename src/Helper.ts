@@ -1,6 +1,6 @@
 module Helper{
  
-    export function generateRandomToken(lenght : number) : string{
+    export function generateToken(lenght : number) : string{
         let token : string = '';
         let elementsToUse : string = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIKLMNOPQRSTVXYZ';
     
@@ -9,7 +9,6 @@ module Helper{
     
         return token;
     }
-
 
 }
 

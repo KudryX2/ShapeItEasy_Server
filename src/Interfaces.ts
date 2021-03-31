@@ -12,6 +12,11 @@ module Interfaces {
     }
 
 
+    export interface ScenesList{
+        name : string;
+    }
+
+
 }
 
 
