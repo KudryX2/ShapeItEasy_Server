@@ -5,7 +5,7 @@ const WebSocketServer = require('ws').Server;
 
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
 import {ScenesManager} from "./ScenesManager";
-import {UsersManager} from "./UsersManager";
+import {ClientsManager} from "./ClientsManager";
 
 const DECODER = new TextDecoder();
 
@@ -47,7 +47,7 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 
 	if(parseOK){										// If parsed handle the request	
 		if(request.kind == 'requestUserToken')       		// Request user token
-			UsersManager.handleUserTokenRequest(socket, request);
+			ClientsManager.handleClientTokenRequest(socket, request);
 	
 		else if(request.kind == 'requestScenesList')		// Scenes requests
 			ScenesManager.handleScenesListRequest(socket, request);
