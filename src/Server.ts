@@ -1,4 +1,5 @@
 'use strict';
+
 const FS = require('fs');
 const HTTPS = require('https');
 const WebSocketServer = require('ws').Server;
@@ -6,6 +7,7 @@ const WebSocketServer = require('ws').Server;
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
 import {ScenesManager} from "./ScenesManager";
 import {ClientsManager} from "./ClientsManager";
+import {Database} from "./Database";
 
 const DECODER = new TextDecoder();
 
@@ -17,7 +19,9 @@ const SERVER = HTTPS.createServer({					// Server
 });
 
 SERVER.listen(2323, () => {
-	console.log('Listening');
+	console.log('WebServer : OK');
+	
+	Database.connect();
 });
 
 const wss = new WebSocketServer({server: SERVER});	// Web Socket
@@ -29,7 +33,6 @@ wss.on('connection', (ws : any) =>{
 	});
 
 });
-
 
 function processRequest(data : BufferSource, socket : WebSocket) : void{ 
 
