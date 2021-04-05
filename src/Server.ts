@@ -49,9 +49,12 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 	}
 
 	if(parseOK){										// If parsed handle the request	
-		if(request.kind == 'requestUserToken')       		// Request user token
-			ClientsManager.handleClientTokenRequest(socket, request);
+		if(request.kind == 'logInRequest')       			// Users requests
+			ClientsManager.handleLogInRequest(socket, request);
 	
+		else if(request.kind == 'signInRequest')
+			ClientsManager.handleSignInRequest(socket, request);
+
 		else if(request.kind == 'requestScenesList')		// Scenes requests
 			ScenesManager.handleScenesListRequest(socket, request);
 

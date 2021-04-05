@@ -11,6 +11,12 @@ module Interfaces {
         userPassword : string;
     }
 
+    export interface SignInData{
+        userName : string,
+        userEmail : string,
+        userPassword : string
+    }
+
 
     export interface ScenesList{
         name : string;
