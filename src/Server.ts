@@ -1,11 +1,13 @@
 'use strict';
+
 const FS = require('fs');
 const HTTPS = require('https');
 const WebSocketServer = require('ws').Server;
 
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
 import {ScenesManager} from "./ScenesManager";
-import {UsersManager} from "./UsersManager";
+import {ClientsManager} from "./ClientsManager";
+import {Database} from "./Database";
 
 const DECODER = new TextDecoder();
 
@@ -17,7 +19,9 @@ const SERVER = HTTPS.createServer({					// Server
 });
 
 SERVER.listen(2323, () => {
-	console.log('Listening');
+	console.log('WebServer : OK');
+	
+	Database.connect();
 });
 
 const wss = new WebSocketServer({server: SERVER});	// Web Socket
@@ -29,7 +33,6 @@ wss.on('connection', (ws : any) =>{
 	});
 
 });
-
 
 function processRequest(data : BufferSource, socket : WebSocket) : void{ 
 
@@ -47,7 +50,7 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 
 	if(parseOK){										// If parsed handle the request	
 		if(request.kind == 'requestUserToken')       		// Request user token
-			UsersManager.handleUserTokenRequest(socket, request);
+			ClientsManager.handleClientTokenRequest(socket, request);
 	
 		else if(request.kind == 'requestScenesList')		// Scenes requests
 			ScenesManager.handleScenesListRequest(socket, request);
