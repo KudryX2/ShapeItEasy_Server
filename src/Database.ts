@@ -21,6 +21,14 @@ module Database{
 
         console.log('Database : OK');
     }
+
+
+    export function getUser(email : string){
+
+        return false;
+
+    }
+
     
 
 }

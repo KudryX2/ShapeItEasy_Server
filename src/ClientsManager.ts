@@ -1,3 +1,4 @@
+import { Database } from "./Database";
 import {Helper} from "./Helper";					// Aux methods
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
@@ -35,15 +36,35 @@ module ClientsManager{
         console.log('Sign In Request');
 
         if(checkSignInData(JSON.parse(request.content), socket)){       // Check the data
-            
-            Socket.write(socket, 'signInCallback', Helper.generateToken(10));   // If everything OK answer with a token
+            // TODO añadir nuevo usuario a la base de datos
+        
+            Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + Helper.generateToken(10) + '" }');   // If everything OK answer with a token
         }
 
     }
 
     function checkSignInData(data : Interfaces.SignInData , socket : WebSocket){
 
-        
+        if(!Helper.validate(data.userName, Helper.DataKind.text)){
+            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Nombre no es valido" }' );
+            return false;
+        } 
+
+        if(!Helper.validate(data.userEmail, Helper.DataKind.email)){
+            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Email no es válido" }' );
+            return false;
+        }
+
+        if(!Helper.validate(data.userPassword, Helper.DataKind.text)){
+            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Contraseña no es valida" }' );
+            return false;
+        }
+    
+
+        if(Database.getUser(data.userEmail)){                   
+            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Usuario ya existe" }' );
+            return false;
+        }
 
 
         return true;
