@@ -7,7 +7,7 @@ const WebSocketServer = require('ws').Server;
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
 import {ScenesManager} from "./ScenesManager";
 import {ClientsManager} from "./ClientsManager";
-import {Database} from "./Database";
+import {Database} from "./database/Database";
 
 const DECODER = new TextDecoder();
 

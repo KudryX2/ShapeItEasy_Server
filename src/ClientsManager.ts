@@ -1,4 +1,4 @@
-import { Database } from "./Database";
+import { Database } from "./database/Database";
 import {Helper} from "./Helper";					// Aux methods
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
