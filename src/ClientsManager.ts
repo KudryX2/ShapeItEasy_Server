@@ -22,7 +22,7 @@ module ClientsManager{
             if(await Database.checkUserCredentials(userCredentials)){	// Check user credentials
 
                 token = Helper.generateToken(10);             			// Create random token for the user
-                clientsMap.set(token, userCredentials.userName);    	// Save the token and user
+                clientsMap.set(token, userCredentials.email);    	// Save the token and user
             }
 
         Socket.write(socket, 'logInCallback', token);
@@ -37,7 +37,10 @@ module ClientsManager{
 
         if(await checkSignInData(signInData, socket)){        // Check the data
             await Database.insertUser(signInData);      // If everything OK insert user 
-            Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + Helper.generateToken(10) + '" }');   // If everything OK answer with a token
+
+            let token = Helper.generateToken(10);
+            clientsMap.set(token, signInData.email);    	    // Save the token and user
+            Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
         }
 
     }
