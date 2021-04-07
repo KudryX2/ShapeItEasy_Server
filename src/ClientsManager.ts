@@ -20,7 +20,7 @@ module ClientsManager{
     
         if(checkLogInData(userCredentials, socket))
             if(await Database.checkUserCredentials(userCredentials)){	// Check user credentials
-                
+
                 token = Helper.generateToken(10);             			// Create random token for the user
                 clientsMap.set(token, userCredentials.userName);    	// Save the token and user
             }
@@ -80,7 +80,7 @@ module ClientsManager{
         }
     
 
-        if(await Database.getUser(data.email)){                   
+        if(await Database.getUser(data.email) != null){                   
             Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Usuario ya existe" }' );
             return false;
         }

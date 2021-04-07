@@ -39,32 +39,36 @@ module Database{
         }
     }
 
-    export async function checkUserCredentials(credentials : Interfaces.UserCredentials){
+    export async function checkUserCredentials(credentials : Interfaces.UserCredentials) : Promise<boolean>{
 
         try{  
-            let result = await database('users').select().where('email', credentials.email).first();
-            
-            if(result == null)         // User with the given email not found
-                return false;
-            
-            let user : Interfaces.DatabaseUser = JSON.parse(JSON.stringify(result));
-            
-            try{
+            let user : Interfaces.DatabaseUser | null = await getUser(credentials.email);
+
+            if(user != null)                    // If user found
                 return await BCRYPT.compare(credentials.password , user.password);  // If everything OK return compare result
-            }catch(exception){
-                console.log('Error comprobando la contraseña del usuario ' + exception);
-            }
-            
+
         }catch(exception){
-            console.log('Error obteniendo el usuario ' + exception);
+            console.log('Error comprobando las credenciales' + exception);
         }
         
-        return false;                   // Something failed -> return false
-        
+        return false;                           // Something failed or user not found -> return false
     }
 
-    export async function getUser(email : string) {
-        return false;
+    export async function getUser(email : string) : Promise<Interfaces.DatabaseUser | null>{
+
+        try{
+            let searchResult = await database('users').select().where('email', email).first();
+
+            if(searchResult == undefined)       // User not found
+                return null;
+            
+            return JSON.parse(JSON.stringify(searchResult));
+
+        }catch(exception){
+            console.log('Error obteniendo un usuario ' + exception);
+        }
+
+        return null;
     }
 }
 
