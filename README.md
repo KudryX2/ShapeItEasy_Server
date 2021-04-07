@@ -16,12 +16,12 @@ https://www.npmjs.com/package/ts-node-dev
 	npm install ts-node-dev -s -D
 	"package.json" -> scripts , añadir "dev": "ts-node-dev --respawn --transpile-only server.ts"
 
-https://www.npmjs.com/package/ws			Web Sockets
+Web Sockets				https://www.npmjs.com/package/ws			
 
 	npm i ws
 
 
-https://www.npmjs.com/package/file-system 	Sistema de archivos
+Sistema de archivos			https://www.npmjs.com/package/file-system 	
 
 	npm i file-system --save
 	npm i --save-dev @types/node		(tipos para typescript)
@@ -39,4 +39,9 @@ Base de datos
 
 	npm i knex				Knex 
 	npm install pg --save			PostgreSQL
+
+
+Encriptación para las contraseñas de la base de datos	https://www.npmjs.com/package/bcrypt	
+
+	npm i bcrypt
 
