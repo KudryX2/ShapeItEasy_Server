@@ -7,8 +7,20 @@ module Interfaces {
     }
     
     export interface UserCredentials{
-        userName : string;
-        userPassword : string;
+        email : string;
+        password : string;
+    }
+
+    export interface SignInData{
+        name : string,
+        email : string,
+        password : string
+    }
+
+    export interface DatabaseUser{
+        name : string,
+        email : string,
+        password : string
     }
 
 

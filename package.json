@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "file-system": "^2.2.2",
     "knex": "^0.95.4",
     "pg": "^8.5.1",
