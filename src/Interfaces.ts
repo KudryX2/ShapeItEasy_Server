@@ -17,6 +17,12 @@ module Interfaces {
         password : string
     }
 
+    export interface DatabaseUser{
+        name : string,
+        email : string,
+        password : string
+    }
+
 
     export interface ScenesList{
         name : string;
