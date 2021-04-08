@@ -1,62 +1,72 @@
-import {Scene} from "./Scene";
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
 import { ClientsManager } from "./ClientsManager";
 
 
-const ENCODER = new TextEncoder();
 const DATABASE = require('./database/Database');
 
 
 module ScenesManager{
 
-    let scenesList = new Array<Scene>();
 
-    export function handleScenesListRequest(socket : WebSocket, request : Interfaces.Request){
+    export async function handleScenesListRequest(socket : WebSocket, request : Interfaces.Request){
 
         let list : JSON[] = [];
-        scenesList.forEach(scene => list.push(scene.getJSON()));
 
-        Socket.write(socket, 'scenesListCallback', JSON.stringify(list));
+        try {
+            list  = await DATABASE.select().column('id','name').table("scenes").where('owner', ClientsManager.getEmail(request.token)).orderBy('name', 'asc');
+            Socket.write(socket, 'scenesListCallback', JSON.stringify(list));
+        }catch(exception){
+            console.log('Error obteniendo la lista de escenas ' + exception )
+            Socket.write(socket, 'scenesListCallback', 'ERROR');
+        }
+
     }
+
 
     export async function handleCreateSceneRequest(socket : WebSocket, request : Interfaces.Request){
         
-        let sceneOwner = ClientsManager.getEmail(request.token);
-
-        console.log('Petición de crear una escena ' + request.content + ' por ' + sceneOwner);
-
         try{
-            await DATABASE.select().table('scenes').insert({id : 'id' , owner : sceneOwner , name : request.content});
+            let sceneOwner = ClientsManager.getEmail(request.token);
 
-            scenesList.push(new Scene(request.content));
-
+            await DATABASE.select().table('scenes').insert({owner : sceneOwner , name : request.content});
+            Socket.write(socket, 'createSceneCallback', 'OK');
+        
         }catch(exception){
-            console.log('Error insertando usuario en la base de datos ' + exception);
+            console.log('Error insertando escena ' + exception);
+            Socket.write(socket, 'createSceneCallback', 'ERROR');
         }
 
-        Socket.write(socket, 'createSceneCallback', 'OK');
     }
 
-    export function handleEditSceneRequest(socket : WebSocket, request : Interfaces.Request){
 
-        console.log('Petición de editar una escena ' + request.content);
+    export async function handleEditSceneRequest(socket : WebSocket, request : Interfaces.Request){
 
-        // TODO modificar la escena
+        try{
+            let updateSceneRequest : Interfaces.UpdateSceneRequest = JSON.parse(request.content); 
+        
+            await DATABASE.update('name', updateSceneRequest.newName).table('scenes').where('id', updateSceneRequest.id);
+            Socket.write(socket, 'editSceneCallback', 'OK');
+        
+        }catch(exception){
+            console.log('Error modificando una escena ' + exception);
+            Socket.write(socket, 'editSceneCallback', 'ERROR');
+        }
 
-        Socket.write(socket, 'editSceneCallback', 'OK');
     }
 
-    export function handleDeleteSceneRequest(socket : WebSocket, request : Interfaces.Request){
 
-        console.log('Petición de eliminar una escena ' + request.content);
+    export async function handleDeleteSceneRequest(socket : WebSocket, request : Interfaces.Request){
 
-        // TODO eliminar la escena
+        try{
+            await DATABASE.table('scenes').where('id', request.content).del();
+            Socket.write(socket, 'deleteSceneCallback', 'OK');
+        }catch(exception){
+            console.log('Error eliminando una escena')
+            Socket.write(socket, 'deleteSceneCallback', 'ERROR');
+        }
 
-        Socket.write(socket, 'deleteSceneCallback', 'OK');
     }
-
-   
 
 
 }
