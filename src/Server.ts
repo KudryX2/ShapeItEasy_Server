@@ -7,7 +7,7 @@ const WebSocketServer = require('ws').Server;
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
 import {ScenesManager} from "./ScenesManager";
 import {ClientsManager} from "./ClientsManager";
-import {Database} from "./database/Database";
+
 
 const DECODER = new TextDecoder();
 
@@ -20,8 +20,6 @@ const SERVER = HTTPS.createServer({					// Server
 
 SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
-	
-	Database.connect();
 });
 
 const wss = new WebSocketServer({server: SERVER});	// Web Socket

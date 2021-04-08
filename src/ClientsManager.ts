@@ -5,6 +5,8 @@ import {Helper} from "./Helper";					// Aux methods
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
 
+import {UsersManager} from './UsersManager';
+
 
 module ClientsManager{
 
@@ -19,7 +21,7 @@ module ClientsManager{
         let token = "";
     
         if(checkLogInData(userCredentials, socket))
-            if(await Database.checkUserCredentials(userCredentials)){	// Check user credentials
+            if(await UsersManager.checkUserCredentials(userCredentials)){	// Check user credentials
 
                 token = Helper.generateToken(10);             			// Create random token for the user
                 clientsMap.set(token, userCredentials.email);    	// Save the token and user
@@ -36,7 +38,7 @@ module ClientsManager{
         let signInData : Interfaces.SignInData = JSON.parse(request.content);
 
         if(await checkSignInData(signInData, socket)){        // Check the data
-            await Database.insertUser(signInData);      // If everything OK insert user 
+            await UsersManager.insertUser(signInData);      // If everything OK insert user 
 
             let token = Helper.generateToken(10);
             clientsMap.set(token, signInData.email);    	    // Save the token and user
@@ -83,7 +85,7 @@ module ClientsManager{
         }
     
 
-        if(await Database.getUser(data.email) != null){                   
+        if(await UsersManager.getUser(data.email) != null){                   
             Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Usuario ya existe" }' );
             return false;
         }
