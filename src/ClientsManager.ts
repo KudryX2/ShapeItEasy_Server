@@ -93,6 +93,11 @@ module ClientsManager{
         return true;
     }
 
+    
+    export function getEmail(token : string){
+        return clientsMap.get(token);
+    }
+
 }
 
 

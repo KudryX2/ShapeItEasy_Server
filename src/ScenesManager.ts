@@ -1,9 +1,11 @@
 import {Scene} from "./Scene";
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
+import { ClientsManager } from "./ClientsManager";
 
 
 const ENCODER = new TextEncoder();
+const DATABASE = require('./database/Database');
 
 
 module ScenesManager{
@@ -18,10 +20,21 @@ module ScenesManager{
         Socket.write(socket, 'scenesListCallback', JSON.stringify(list));
     }
 
-    export function handleCreateSceneRequest(socket : WebSocket, request : Interfaces.Request){
+    export async function handleCreateSceneRequest(socket : WebSocket, request : Interfaces.Request){
         
-        console.log('Petición de crear una escena ' + request.content);
-        scenesList.push(new Scene(request.content));
+        let sceneOwner = ClientsManager.getEmail(request.token);
+
+        console.log('Petición de crear una escena ' + request.content + ' por ' + sceneOwner);
+
+        try{
+            await DATABASE.select().table('scenes').insert({id : 'id' , owner : sceneOwner , name : request.content});
+
+            scenesList.push(new Scene(request.content));
+
+        }catch(exception){
+            console.log('Error insertando usuario en la base de datos ' + exception);
+        }
+
         Socket.write(socket, 'createSceneCallback', 'OK');
     }
 

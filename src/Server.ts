@@ -10,6 +10,7 @@ import {ClientsManager} from "./ClientsManager";
 
 
 const DECODER = new TextDecoder();
+const DATABASE = require('./database/Database');
 
 
 const SERVER = HTTPS.createServer({					// Server
@@ -20,6 +21,10 @@ const SERVER = HTTPS.createServer({					// Server
 
 SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
+
+	DATABASE.migrate.latest();
+
+	DATABASE.seed.run();
 });
 
 const wss = new WebSocketServer({server: SERVER});	// Web Socket
