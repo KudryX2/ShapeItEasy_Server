@@ -28,6 +28,10 @@ module Interfaces {
         name : string;
     }
 
+    export interface UpdateSceneRequest{
+        id : string,
+        newName : string
+    }
 
 }
 
