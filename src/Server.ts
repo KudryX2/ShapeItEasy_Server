@@ -52,27 +52,50 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 	}
 
 	if(parseOK){										// If parsed handle the request	
-		if(request.kind == 'logInRequest')       			// Users requests
-			ClientsManager.handleLogInRequest(socket, request);
-	
-		else if(request.kind == 'signInRequest')
-			ClientsManager.handleSignInRequest(socket, request);
-
-		else if(request.kind == 'requestScenesList')		// Scenes requests
-			ScenesManager.handleScenesListRequest(socket, request);
-
-		else if(request.kind == 'requestCreateScene')
-			ScenesManager.handleCreateSceneRequest(socket, request);
-
-		else if(request.kind == 'requestEditScene')
-			ScenesManager.handleEditSceneRequest(socket, request);
-
-		else if(request.kind == 'requestDeleteScene')
-			ScenesManager.handleDeleteSceneRequest(socket, request);
-
-		else                                           		// NOT DEFINED KIND
-			console.log('Petición de tipo desconocido ' + data.toString());
+		
+		if(request.token == '')											// No token -> Not restricted requests
+			processNotRestrictedRequest(request, socket);
+		
+		else if(ClientsManager.getEmail(request.token) != undefined) 	// Valid token -> Restricted requests
+			processRestrictedRequest(request, socket);
+		
+		else															
+			console.log('Intento de realizar una petición sin un token válido')
 
 	}
+
+}
+
+
+function processNotRestrictedRequest(request : Interfaces.Request, socket : WebSocket){
+
+	if(request.kind == 'logInRequest')       			
+		ClientsManager.handleLogInRequest(socket, request);
+
+	else if(request.kind == 'signInRequest')
+		ClientsManager.handleSignInRequest(socket, request);
+
+	else 
+		console.log('Tipo de petición no restringida desconocido ' + request.kind);
+
+}
+
+
+function processRestrictedRequest(request : Interfaces.Request, socket : WebSocket){
+	
+	if(request.kind == 'requestScenesList')		
+		ScenesManager.handleScenesListRequest(socket, request);
+
+	else if(request.kind == 'requestCreateScene')
+		ScenesManager.handleCreateSceneRequest(socket, request);
+
+	else if(request.kind == 'requestEditScene')
+		ScenesManager.handleEditSceneRequest(socket, request);
+
+	else if(request.kind == 'requestDeleteScene')
+		ScenesManager.handleDeleteSceneRequest(socket, request);
+
+	else                                           		// NOT DEFINED KIND
+		console.log('Tipo de petición desconocido ' + request.kind);
 
 }

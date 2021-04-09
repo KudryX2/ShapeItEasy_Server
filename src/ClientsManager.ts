@@ -1,6 +1,3 @@
-import { networkInterfaces } from "node:os";
-import { Interface } from "node:readline";
-import { Database } from "./database/Database";
 import {Helper} from "./Helper";					// Aux methods
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
@@ -93,7 +90,9 @@ module ClientsManager{
         return true;
     }
 
-    
+    /*
+        Auxiliar functions
+    */
     export function getEmail(token : string){
         return clientsMap.get(token);
     }
