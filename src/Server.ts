@@ -98,6 +98,9 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 	else if(request.kind == 'requestDeleteScene')
 		ScenesManager.handleDeleteSceneRequest(socket, request);
 
+	else if(request.kind == 'requestConnect')
+		ScenesManager.handleConnectRequest(socket, request);
+
 	else                                           				// NOT DEFINED KIND
 		console.log('Tipo de petición desconocido ' + request.kind);
 

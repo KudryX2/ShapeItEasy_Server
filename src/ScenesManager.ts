@@ -1,6 +1,7 @@
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
 import { ClientsManager } from "./ClientsManager";
+import { isConditionalExpression } from "typescript";
 
 
 const DATABASE = require('./database/Database');
@@ -66,6 +67,15 @@ module ScenesManager{
             Socket.write(socket, 'deleteSceneCallback', 'ERROR');
         }
 
+    }
+
+
+    export async function handleConnectRequest(socket : WebSocket, request : Interfaces.Request){
+
+        console.log('Request ' + request.content);
+
+
+        Socket.write(socket, 'connectCallback', 'OK');
     }
 
 
