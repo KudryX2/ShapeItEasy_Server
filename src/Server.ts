@@ -69,10 +69,10 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 
 function processNotRestrictedRequest(request : Interfaces.Request, socket : WebSocket){
 
-	if(request.kind == 'logInRequest')       			
+	if(request.kind == 'logInRequest')      					// Handle Log In Request 			
 		ClientsManager.handleLogInRequest(socket, request);
 
-	else if(request.kind == 'signInRequest')
+	else if(request.kind == 'signInRequest')					// Handle Sign In Request
 		ClientsManager.handleSignInRequest(socket, request);
 
 	else 
@@ -83,7 +83,10 @@ function processNotRestrictedRequest(request : Interfaces.Request, socket : WebS
 
 function processRestrictedRequest(request : Interfaces.Request, socket : WebSocket){
 	
-	if(request.kind == 'requestScenesList')		
+	if(request.kind == 'logOutRequest')							// Handle Log Out Request
+		ClientsManager.handleLogOutRequest(socket, request);
+	
+	else if(request.kind == 'requestScenesList')				// Handle Scenes Request					
 		ScenesManager.handleScenesListRequest(socket, request);
 
 	else if(request.kind == 'requestCreateScene')
@@ -95,7 +98,7 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 	else if(request.kind == 'requestDeleteScene')
 		ScenesManager.handleDeleteSceneRequest(socket, request);
 
-	else                                           		// NOT DEFINED KIND
+	else                                           				// NOT DEFINED KIND
 		console.log('Tipo de petición desconocido ' + request.kind);
 
 }

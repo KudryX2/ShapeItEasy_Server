@@ -45,6 +45,16 @@ module ClientsManager{
     }
 
 
+    export function handleLogOutRequest(socket : WebSocket, request : Interfaces.Request){
+
+        console.log('Log out Request');
+
+        clientsMap.delete(request.token);           // Remove the caller from clients map
+
+        Socket.write(socket, 'logOutCallback', 'OK');
+    }
+
+
     /*
         Data validation methods
     */
