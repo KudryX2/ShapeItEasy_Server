@@ -1,7 +1,6 @@
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
 import { ClientsManager } from "./ClientsManager";
-import { isConditionalExpression } from "typescript";
 
 
 const DATABASE = require('./database/Database');
@@ -72,12 +71,21 @@ module ScenesManager{
 
     export async function handleConnectRequest(socket : WebSocket, request : Interfaces.Request){
 
-        console.log('Request ' + request.content);
+        console.log('Request ' + request.content + ' by ' + ClientsManager.getEmail(request.token));
 
+        // TODO comprobar is el usuario con el token de la petición tiene permiso para conectarse a la escena que ha solicitado
 
         Socket.write(socket, 'connectCallback', 'OK');
     }
 
+
+    export async function handleDisconnectRequest(socket : WebSocket, request : Interfaces.Request){
+
+        console.log('Disconnect Request by ' + ClientsManager.getEmail(request.token));
+
+
+        Socket.write(socket, 'disconnectCallback', 'OK');
+    }
 
 }
 
