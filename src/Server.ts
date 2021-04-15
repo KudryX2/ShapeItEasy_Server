@@ -23,8 +23,7 @@ SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
 
 	DATABASE.migrate.latest();
-
-	DATABASE.seed.run();
+//	DATABASE.seed.run();			
 });
 
 const wss = new WebSocketServer({server: SERVER});	// Web Socket

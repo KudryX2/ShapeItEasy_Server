@@ -8,13 +8,16 @@ const DATABASE = require('./database/Database');
 
 module ScenesManager{
 
+    let connectionsMap : Map<string, Array<string>> = new Map<string, Array<string>>();
 
+    
     export async function handleScenesListRequest(socket : WebSocket, request : Interfaces.Request){
 
         let list : JSON[] = [];
 
         try {
-            list  = await DATABASE.select().column('id','name').table("scenes").where('owner', ClientsManager.getEmail(request.token)).orderBy('name', 'asc');
+//            list  = await DATABASE.select().column('id','name').table("scenes").where('owner', ClientsManager.getEmail(request.token)).orderBy('name', 'asc');
+            list  = await DATABASE.select().column('id','name').table("scenes").orderBy('name', 'asc');       // Testing
             Socket.write(socket, 'scenesListCallback', JSON.stringify(list));
         }catch(exception){
             console.log('Error obteniendo la lista de escenas ' + exception )
@@ -69,23 +72,64 @@ module ScenesManager{
     }
 
 
-    export async function handleConnectRequest(socket : WebSocket, request : Interfaces.Request){
+    export async function handleConnectRequest(socket : WebSocket, request : Interfaces.Request){        
+        let sceneID : string = request.content;
+        let clientEmail : string = ClientsManager.getEmail(request.token);
+                
+        let scene = await DATABASE.select().column('id','name','owner').table("scenes").where('id', sceneID).first();
+        
+        if(scene != undefined){     // Check if scene exists
+            
+            let sceneConnections : Array<string> | undefined = connectionsMap.get(sceneID);    // Users connected to the scene
 
-        console.log('Request ' + request.content + ' by ' + ClientsManager.getEmail(request.token));
+            if(sceneConnections != undefined){          // Existing connections 
+                sceneConnections.push(clientEmail);                         // add new connection
+                connectionsMap.set(sceneID, sceneConnections);             // update the connections map
 
-        // TODO comprobar is el usuario con el token de la petición tiene permiso para conectarse a la escena que ha solicitado
+            }else{                                      // No connections
+                let connectionsList : Array<string> = new Array<string>();  // create new connections list
+                connectionsList.push(clientEmail);                          // add new connection
+                connectionsMap.set(sceneID, connectionsList);              // add entry to the map
+            
+            }
 
-        Socket.write(socket, 'connectCallback', 'OK');
+            Socket.write(socket, 'connectCallback', 'OK');
+
+        }else
+            Socket.write(socket, 'connectCallback', 'La escena no existe');   
+    
     }
 
 
     export async function handleDisconnectRequest(socket : WebSocket, request : Interfaces.Request){
 
-        console.log('Disconnect Request by ' + ClientsManager.getEmail(request.token));
+        let clientEmail : string = ClientsManager.getEmail(request.token);
+        let sceneID : string = request.content;
+        let connectionsList : Array<string> | undefined = connectionsMap.get(sceneID);
+        
+        if(connectionsList != undefined){                           // Check if scene has connections
+            delete connectionsList[connectionsList.indexOf(clientEmail)];   // Delete connection from the list
 
+            if(connectionsList.length == 0)                             // IF connections list empty 
+                connectionsMap.delete(sceneID);                             // Delete map entry 
+            else                                                        // ELSE
+                connectionsMap.set(sceneID, connectionsList);               // Update map entry 
 
-        Socket.write(socket, 'disconnectCallback', 'OK');
+            Socket.write(socket, 'disconnectCallback', 'OK');
+
+        }else
+            Socket.write(socket, 'disconnectCallback', 'La escena no existe');
+
     }
+
+/*
+    function printConnectionsMap(){             // Testing
+        console.log('mapa de conexiónes');
+        connectionsMap.forEach((value : Array<string> , key : string ) => 
+            value.forEach((value : string) => console.log(value))
+        );
+    }
+*/
 
 }
 
