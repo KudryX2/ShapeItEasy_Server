@@ -23,8 +23,7 @@ SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
 
 	DATABASE.migrate.latest();
-
-	DATABASE.seed.run();
+//	DATABASE.seed.run();			
 });
 
 const wss = new WebSocketServer({server: SERVER});	// Web Socket
@@ -97,6 +96,12 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 
 	else if(request.kind == 'requestDeleteScene')
 		ScenesManager.handleDeleteSceneRequest(socket, request);
+
+	else if(request.kind == 'requestConnect')
+		ScenesManager.handleConnectRequest(socket, request);
+
+	else if(request.kind == 'requestDisconnect')
+		ScenesManager.handleDisconnectRequest(socket, request);
 
 	else                                           				// NOT DEFINED KIND
 		console.log('Tipo de petición desconocido ' + request.kind);
