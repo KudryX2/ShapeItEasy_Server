@@ -14,15 +14,19 @@ module ClientsManager{
         
         console.log('Log In Request');
 
-        let userCredentials = JSON.parse(request.content);
+        let userCredentials : Interfaces.UserCredentials = JSON.parse(request.content);
         let token = "";
     
-        if(checkLogInData(userCredentials, socket))
-            if(await UsersManager.checkUserCredentials(userCredentials)){	// Check user credentials
+        if(checkLogInData(userCredentials, socket)){                // Validate data
+
+            let checkUserCredentialsResult : boolean | Interfaces.User = await UsersManager.checkUserCredentials(userCredentials);
+
+            if(checkUserCredentialsResult != false){	            // Check user credentials
 
                 token = Helper.generateToken(10);             			// Create random token for the user
-                clientsMap.set(token, userCredentials.email);    	// Save the token and user
+                clientsMap.set(token, checkUserCredentialsResult);    	// Save the token and user
             }
+        }
 
         Socket.write(socket, 'logInCallback', token);
     }
@@ -34,12 +38,14 @@ module ClientsManager{
         
         let signInData : Interfaces.SignInData = JSON.parse(request.content);
 
-        if(await checkSignInData(signInData, socket)){        // Check the data
-            await UsersManager.insertUser(signInData);      // If everything OK insert user 
+        if(await checkSignInData(signInData, socket)){          // Check the data
+            let insertedUser : Interfaces.User | null = await UsersManager.insertUser(signInData);      // If everything OK insert user 
 
-            let token = Helper.generateToken(10);
-            clientsMap.set(token, signInData.email);    	    // Save the token and user
-            Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
+            if(insertedUser != null){                           // If user successfuly inserted in db
+                let token = Helper.generateToken(10);
+                clientsMap.set(token, insertedUser);    	    // Save the token and user
+                Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
+            }
         }
 
     }
@@ -50,6 +56,8 @@ module ClientsManager{
         console.log('Log out Request');
 
         clientsMap.delete(request.token);           // Remove the caller from clients map
+
+        // TODO comprobar si el usuario estaba conectado a una escena y si lo estaba eliminarlo del mapa de conexiones
 
         Socket.write(socket, 'logOutCallback', 'OK');
     }
@@ -104,7 +112,7 @@ module ClientsManager{
         Auxiliar functions
     */
     export function getEmail(token : string){
-        return clientsMap.get(token);
+        return clientsMap.get(token).email;
     }
 
 }

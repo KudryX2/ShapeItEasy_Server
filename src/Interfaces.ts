@@ -6,6 +6,13 @@ module Interfaces {
         content : string;
     }
     
+    export interface User{
+        id : string,
+        name : string,
+        email : string,
+        password : string
+    }
+
     export interface UserCredentials{
         email : string;
         password : string;
@@ -17,11 +24,6 @@ module Interfaces {
         password : string
     }
 
-    export interface DatabaseUser{
-        name : string,
-        email : string,
-        password : string
-    }
 
 
     export interface ScenesList{

@@ -22,7 +22,9 @@ const SERVER = HTTPS.createServer({					// Server
 SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
 
+//	DATABASE.migrate.down();
 	DATABASE.migrate.latest();
+
 //	DATABASE.seed.run();			
 });
 
