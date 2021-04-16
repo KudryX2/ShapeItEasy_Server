@@ -12,9 +12,7 @@ module ClientsManager{
 
     export async function handleLogInRequest(socket : WebSocket, request : Interfaces.Request){
         
-        console.log('Log In Request');
-
-        let userCredentials : Interfaces.UserCredentials = JSON.parse(request.content);
+        let userCredentials : Interfaces.User = JSON.parse(request.content);
         let token = "";
     
         if(checkLogInData(userCredentials, socket)){                // Validate data
@@ -33,13 +31,11 @@ module ClientsManager{
     
 
     export async function handleSignInRequest(socket : WebSocket, request : Interfaces.Request){
-
-        console.log('Sign In Request') ;
         
-        let signInData : Interfaces.SignInData = JSON.parse(request.content);
+        let credentials : Interfaces.User = JSON.parse(request.content);
 
-        if(await checkSignInData(signInData, socket)){          // Check the data
-            let insertedUser : Interfaces.User | null = await UsersManager.insertUser(signInData);      // If everything OK insert user 
+        if(await checkSignInData(credentials, socket)){          // Check the data
+            let insertedUser : Interfaces.User | null = await UsersManager.insertUser(credentials);      // If everything OK insert user 
 
             if(insertedUser != null){                           // If user successfuly inserted in db
                 let token = Helper.generateToken(10);
@@ -53,12 +49,7 @@ module ClientsManager{
 
     export function handleLogOutRequest(socket : WebSocket, request : Interfaces.Request){
 
-        console.log('Log out Request');
-
         clientsMap.delete(request.token);           // Remove the caller from clients map
-
-        // TODO comprobar si el usuario estaba conectado a una escena y si lo estaba eliminarlo del mapa de conexiones
-
         Socket.write(socket, 'logOutCallback', 'OK');
     }
 
@@ -66,7 +57,7 @@ module ClientsManager{
     /*
         Data validation methods
     */
-    function checkLogInData(data : Interfaces.UserCredentials, socket : WebSocket){
+    function checkLogInData(data : Interfaces.User, socket : WebSocket){
 
         if(!Helper.validate(data.email, Helper.DataKind.email)){
             Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Email no es valido" }' );
@@ -82,7 +73,7 @@ module ClientsManager{
 
     }
 
-    async function checkSignInData(data : Interfaces.SignInData , socket : WebSocket){
+    async function checkSignInData(data : Interfaces.User , socket : WebSocket){
 
         if(!Helper.validate(data.name, Helper.DataKind.text)){
             Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Nombre no es valido" }' );

@@ -8,7 +8,7 @@ const DATABASE = require('./database/Database');
 module UsersManager{
 
     
-    export async function insertUser(data : Interfaces.SignInData) : Promise<Interfaces.User | null>{
+    export async function insertUser(data : Interfaces.User) : Promise<Interfaces.User | null>{
 
         try{
             await DATABASE.select().table('users').insert({name : data.name, email : data.email , password : BCRYPT.hashSync(data.password , 10)});
@@ -20,7 +20,7 @@ module UsersManager{
     }
 
 
-    export async function checkUserCredentials(credentials : Interfaces.UserCredentials) : Promise <boolean | Interfaces.User>{
+    export async function checkUserCredentials(credentials : Interfaces.User) : Promise <boolean | Interfaces.User>{
 
         try{  
             let user : Interfaces.User | null = await getUser(credentials.email);

@@ -54,6 +54,8 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 
 	if(parseOK){										// If parsed handle the request	
 		
+		console.log("Request : " + request.kind);
+
 		if(request.token == '')											// No token -> Not restricted requests
 			processNotRestrictedRequest(request, socket);
 		
