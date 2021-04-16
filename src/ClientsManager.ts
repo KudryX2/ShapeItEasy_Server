@@ -12,34 +12,36 @@ module ClientsManager{
 
     export async function handleLogInRequest(socket : WebSocket, request : Interfaces.Request){
         
-        console.log('Log In Request');
-
-        let userCredentials = JSON.parse(request.content);
+        let userCredentials : Interfaces.User = JSON.parse(request.content);
         let token = "";
     
-        if(checkLogInData(userCredentials, socket))
-            if(await UsersManager.checkUserCredentials(userCredentials)){	// Check user credentials
+        if(checkLogInData(userCredentials, socket)){                // Validate data
+
+            let checkUserCredentialsResult : boolean | Interfaces.User = await UsersManager.checkUserCredentials(userCredentials);
+
+            if(checkUserCredentialsResult != false){	            // Check user credentials
 
                 token = Helper.generateToken(10);             			// Create random token for the user
-                clientsMap.set(token, userCredentials.email);    	// Save the token and user
+                clientsMap.set(token, checkUserCredentialsResult);    	// Save the token and user
             }
+        }
 
         Socket.write(socket, 'logInCallback', token);
     }
     
 
     export async function handleSignInRequest(socket : WebSocket, request : Interfaces.Request){
-
-        console.log('Sign In Request') ;
         
-        let signInData : Interfaces.SignInData = JSON.parse(request.content);
+        let credentials : Interfaces.User = JSON.parse(request.content);
 
-        if(await checkSignInData(signInData, socket)){        // Check the data
-            await UsersManager.insertUser(signInData);      // If everything OK insert user 
+        if(await checkSignInData(credentials, socket)){          // Check the data
+            let insertedUser : Interfaces.User | null = await UsersManager.insertUser(credentials);      // If everything OK insert user 
 
-            let token = Helper.generateToken(10);
-            clientsMap.set(token, signInData.email);    	    // Save the token and user
-            Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
+            if(insertedUser != null){                           // If user successfuly inserted in db
+                let token = Helper.generateToken(10);
+                clientsMap.set(token, insertedUser);    	    // Save the token and user
+                Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
+            }
         }
 
     }
@@ -47,10 +49,7 @@ module ClientsManager{
 
     export function handleLogOutRequest(socket : WebSocket, request : Interfaces.Request){
 
-        console.log('Log out Request');
-
         clientsMap.delete(request.token);           // Remove the caller from clients map
-
         Socket.write(socket, 'logOutCallback', 'OK');
     }
 
@@ -58,7 +57,7 @@ module ClientsManager{
     /*
         Data validation methods
     */
-    function checkLogInData(data : Interfaces.UserCredentials, socket : WebSocket){
+    function checkLogInData(data : Interfaces.User, socket : WebSocket){
 
         if(!Helper.validate(data.email, Helper.DataKind.email)){
             Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Email no es valido" }' );
@@ -74,7 +73,7 @@ module ClientsManager{
 
     }
 
-    async function checkSignInData(data : Interfaces.SignInData , socket : WebSocket){
+    async function checkSignInData(data : Interfaces.User , socket : WebSocket){
 
         if(!Helper.validate(data.name, Helper.DataKind.text)){
             Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Nombre no es valido" }' );
@@ -104,7 +103,7 @@ module ClientsManager{
         Auxiliar functions
     */
     export function getEmail(token : string){
-        return clientsMap.get(token);
+        return clientsMap.get(token).email;
     }
 
 }

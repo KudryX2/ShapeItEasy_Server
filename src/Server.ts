@@ -22,7 +22,9 @@ const SERVER = HTTPS.createServer({					// Server
 SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
 
+//	DATABASE.migrate.down();
 	DATABASE.migrate.latest();
+
 //	DATABASE.seed.run();			
 });
 
@@ -52,6 +54,8 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 
 	if(parseOK){										// If parsed handle the request	
 		
+		console.log("Request : " + request.kind);
+
 		if(request.token == '')											// No token -> Not restricted requests
 			processNotRestrictedRequest(request, socket);
 		

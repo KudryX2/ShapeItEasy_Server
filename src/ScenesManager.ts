@@ -30,9 +30,10 @@ module ScenesManager{
     export async function handleCreateSceneRequest(socket : WebSocket, request : Interfaces.Request){
         
         try{
-            let sceneOwner = ClientsManager.getEmail(request.token);
+            let ownerEmail : string = ClientsManager.getEmail(request.token);
+            let owner : Interfaces.User =  await DATABASE.select().table('users').where('email', ownerEmail).first();
 
-            await DATABASE.select().table('scenes').insert({owner : sceneOwner , name : request.content});
+            await DATABASE.select().table('scenes').insert({owner : owner.id , name : request.content});
             Socket.write(socket, 'createSceneCallback', 'OK');
         
         }catch(exception){
@@ -74,7 +75,7 @@ module ScenesManager{
 
     export async function handleConnectRequest(socket : WebSocket, request : Interfaces.Request){        
         let sceneID : string = request.content;
-        let clientEmail : string = ClientsManager.getEmail(request.token);
+        let clientToken : string = request.token;
                 
         let scene = await DATABASE.select().column('id','name','owner').table("scenes").where('id', sceneID).first();
         
@@ -83,13 +84,13 @@ module ScenesManager{
             let sceneConnections : Array<string> | undefined = connectionsMap.get(sceneID);    // Users connected to the scene
 
             if(sceneConnections != undefined){          // Existing connections 
-                sceneConnections.push(clientEmail);                         // add new connection
-                connectionsMap.set(sceneID, sceneConnections);             // update the connections map
+                sceneConnections.push(clientToken);                         // add new connection
+                connectionsMap.set(sceneID, sceneConnections);              // update the connections map
 
             }else{                                      // No connections
                 let connectionsList : Array<string> = new Array<string>();  // create new connections list
-                connectionsList.push(clientEmail);                          // add new connection
-                connectionsMap.set(sceneID, connectionsList);              // add entry to the map
+                connectionsList.push(clientToken);                          // add new connection
+                connectionsMap.set(sceneID, connectionsList);               // add entry to the map
             
             }
 
@@ -103,12 +104,12 @@ module ScenesManager{
 
     export async function handleDisconnectRequest(socket : WebSocket, request : Interfaces.Request){
 
-        let clientEmail : string = ClientsManager.getEmail(request.token);
         let sceneID : string = request.content;
+        let clientToken : string = request.token;
         let connectionsList : Array<string> | undefined = connectionsMap.get(sceneID);
         
         if(connectionsList != undefined){                           // Check if scene has connections
-            delete connectionsList[connectionsList.indexOf(clientEmail)];   // Delete connection from the list
+            delete connectionsList[connectionsList.indexOf(clientToken)];   // Delete connection from the list
 
             if(connectionsList.length == 0)                             // IF connections list empty 
                 connectionsMap.delete(sceneID);                             // Delete map entry 
