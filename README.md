@@ -40,6 +40,9 @@ Base de datos
 	npm i knex				Knex 
 	npm install pg --save			PostgreSQL
 
+PostgreSQL (cliente base de datos)	https://www.npmjs.com/package/pg		
+	
+	npm install pg --save		
 
 Encriptación para las contraseñas de la base de datos	https://www.npmjs.com/package/bcrypt	
 
