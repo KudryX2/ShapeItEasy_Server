@@ -8,7 +8,7 @@ const DATABASE = require('./database/Database');
 
 module ScenesManager{
 
-    let connectionsMap : Map<string, Array<string>> = new Map<string, Array<string>>();
+    let connectionsMap : Map<string, Array<string>> = new Map<string, Array<string>>();     // SceneID , List<UserTokens>
 
     
     export async function handleScenesListRequest(socket : WebSocket, request : Interfaces.Request){
@@ -30,12 +30,16 @@ module ScenesManager{
     export async function handleCreateSceneRequest(socket : WebSocket, request : Interfaces.Request){
         
         try{
-            let ownerEmail : string = ClientsManager.getEmail(request.token);
-            let owner : Interfaces.User =  await DATABASE.select().table('users').where('email', ownerEmail).first();
+            let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);     
 
-            await DATABASE.select().table('scenes').insert({owner : owner.id , name : request.content});
-            Socket.write(socket, 'createSceneCallback', 'OK');
-        
+            if(user != undefined){
+                // TODO solo buscamos el identificador asi que esta consulta se puede mejorar
+                let owner : Interfaces.User =  await DATABASE.select().table('users').where('email', user.email).first();
+    
+                await DATABASE.select().table('scenes').insert({owner : owner.id , name : request.content});
+                Socket.write(socket, 'createSceneCallback', 'OK');
+            }
+            
         }catch(exception){
             console.log('Error insertando escena ' + exception);
             Socket.write(socket, 'createSceneCallback', 'ERROR');
@@ -131,6 +135,26 @@ module ScenesManager{
         );
     }
 */
+
+    export function deleteConnection(token : string){   // Delete a connection of a specific user
+        
+        let stopLooping : boolean = false;
+
+        for(let [sceneID, connectionsList] of connectionsMap){  // For each scene
+
+            for( let connection of connectionsList)             // For each scene connection (token)
+                if(connection == token){                            // Token Found 
+                    delete connectionsList[connectionsList.indexOf(connection)];    // Delete token from the list
+                    connectionsMap.set(sceneID, connectionsList);                   // Update connectionsMap
+                    stopLooping = true;
+                    break;
+                }
+                    
+            if(stopLooping)
+                break;
+        }
+
+    }
 
 }
 
