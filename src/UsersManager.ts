@@ -42,13 +42,7 @@ module UsersManager{
     export async function getUser(email : string) : Promise<Interfaces.User | null>{
 
         try{
-            let searchResult = await DATABASE.select().table('users').where('email', email).first();
-
-            if(searchResult == undefined)       // User not found
-                return null;
-            
-            return JSON.parse(JSON.stringify(searchResult));
-
+            return await DATABASE.select().table('users').where('email', email).first();
         }catch(exception){
             console.log('Error obteniendo un usuario ' + exception);
         }

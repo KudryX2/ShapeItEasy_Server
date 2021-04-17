@@ -32,11 +32,8 @@ module ScenesManager{
         try{
             let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);     
 
-            if(user != undefined){
-                // TODO solo buscamos el identificador asi que esta consulta se puede mejorar
-                let owner : Interfaces.User =  await DATABASE.select().table('users').where('email', user.email).first();
-    
-                await DATABASE.select().table('scenes').insert({owner : owner.id , name : request.content});
+            if(user != undefined){    
+                await DATABASE.select().table('scenes').insert({owner : user.id , name : request.content});
                 Socket.write(socket, 'createSceneCallback', 'OK');
             }
             
