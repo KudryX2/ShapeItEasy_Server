@@ -59,7 +59,7 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 		if(request.token == '')											// No token -> Not restricted requests
 			processNotRestrictedRequest(request, socket);
 		
-		else if(ClientsManager.getEmail(request.token) != undefined) 	// Valid token -> Restricted requests
+		else if(ClientsManager.getUser(request.token) != undefined) 	// Valid token -> Restricted requests
 			processRestrictedRequest(request, socket);
 		
 		else															

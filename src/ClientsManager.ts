@@ -1,5 +1,6 @@
 import {Helper} from "./Helper";					// Aux methods
 import {Interfaces} from "./Interfaces";
+import { ScenesManager } from "./ScenesManager";
 import {Socket} from "./Socket";
 
 import {UsersManager} from './UsersManager';
@@ -7,7 +8,7 @@ import {UsersManager} from './UsersManager';
 
 module ClientsManager{
 
-    let clientsMap = new Map();
+    let usersMap : Map<string, Interfaces.User> = new Map<string, Interfaces.User>();     // UserToken , User
 
 
     export async function handleLogInRequest(socket : WebSocket, request : Interfaces.Request){
@@ -19,16 +20,26 @@ module ClientsManager{
 
             let checkUserCredentialsResult : boolean | Interfaces.User = await UsersManager.checkUserCredentials(userCredentials);
 
-            if(checkUserCredentialsResult != false){	            // Check user credentials
+            if( typeof checkUserCredentialsResult !== 'boolean'){   // Check user credentials
+
+                for(let [token, user] of usersMap){                 // Check if user already connected from another client
+
+                    if(user.email == userCredentials.email){           // If Connected
+                        console.log('Se va a eliminar la sesión antigua');
+                        usersMap.delete(token);                             // Delete clientsMap entry
+                        ScenesManager.deleteConnection(token);              // Delete connectionsMap entry (Scenes)
+                        break;
+                    }
+                }
 
                 token = Helper.generateToken(10);             			// Create random token for the user
-                clientsMap.set(token, checkUserCredentialsResult);    	// Save the token and user
+                usersMap.set(token, checkUserCredentialsResult);    	// Save the token and user
             }
         }
 
         Socket.write(socket, 'logInCallback', token);
     }
-    
+
 
     export async function handleSignInRequest(socket : WebSocket, request : Interfaces.Request){
         
@@ -39,7 +50,7 @@ module ClientsManager{
 
             if(insertedUser != null){                           // If user successfuly inserted in db
                 let token = Helper.generateToken(10);
-                clientsMap.set(token, insertedUser);    	    // Save the token and user
+                usersMap.set(token, insertedUser);    	        // Save the token and user
                 Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
             }
         }
@@ -48,8 +59,7 @@ module ClientsManager{
 
 
     export function handleLogOutRequest(socket : WebSocket, request : Interfaces.Request){
-
-        clientsMap.delete(request.token);           // Remove the caller from clients map
+        usersMap.delete(request.token);           // Remove the caller from clients map
         Socket.write(socket, 'logOutCallback', 'OK');
     }
 
@@ -102,8 +112,8 @@ module ClientsManager{
     /*
         Auxiliar functions
     */
-    export function getEmail(token : string){
-        return clientsMap.get(token).email;
+    export function getUser(token : string) : Interfaces.User | undefined{
+        return usersMap.get(token);  
     }
 
 }
