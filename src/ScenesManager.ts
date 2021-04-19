@@ -17,7 +17,7 @@ module ScenesManager{
 
         try {
 //            list  = await DATABASE.select().column('id','name').table("scenes").where('owner', ClientsManager.getEmail(request.token)).orderBy('name', 'asc');
-            list  = await DATABASE.select().column('id','name').table("scenes").orderBy('name', 'asc');       // Testing
+            list  = await DATABASE.select().column('id','name','description').table("scenes").orderBy('name', 'asc');       // Testing
             Socket.write(socket, 'scenesListCallback', JSON.stringify(list));
         }catch(exception){
             console.log('Error obteniendo la lista de escenas ' + exception )
@@ -30,10 +30,11 @@ module ScenesManager{
     export async function handleCreateSceneRequest(socket : WebSocket, request : Interfaces.Request){
         
         try{
-            let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);     
+            let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);   
+            let scene : Interfaces.Scene = JSON.parse(request.content);
 
             if(user != undefined){    
-                await DATABASE.select().table('scenes').insert({owner : user.id , name : request.content});
+                await DATABASE.select().table('scenes').insert({owner : user.id , name : scene.name, description : scene.description});
                 Socket.write(socket, 'createSceneCallback', 'OK');
             }
             
@@ -48,9 +49,9 @@ module ScenesManager{
     export async function handleEditSceneRequest(socket : WebSocket, request : Interfaces.Request){
 
         try{
-            let updateSceneRequest : Interfaces.UpdateSceneRequest = JSON.parse(request.content); 
-        
-            await DATABASE.update('name', updateSceneRequest.newName).table('scenes').where('id', updateSceneRequest.id);
+            let scene : Interfaces.Scene = JSON.parse(request.content);
+
+            await DATABASE.update('name', scene.name).update('description', scene.description).table('scenes').where('id', scene.id);
             Socket.write(socket, 'editSceneCallback', 'OK');
         
         }catch(exception){

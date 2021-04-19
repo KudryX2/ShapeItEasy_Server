@@ -17,9 +17,10 @@ module Interfaces {
         name : string;
     }
 
-    export interface UpdateSceneRequest{
+    export interface Scene{
         id : string,
-        newName : string
+        name : string,
+        description : string
     }
 
 }
