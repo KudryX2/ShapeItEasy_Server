@@ -10,6 +10,11 @@ exports.seed = function(knex, Promise) {
             name: 'kudry',
             email: 'kudry',
             password: BCRYPT.hashSync('pato' , 10)
+        },
+        {
+            name: 'test',
+            email: 'test',
+            password: BCRYPT.hashSync('pato' , 10)
         }
         ]);
     });

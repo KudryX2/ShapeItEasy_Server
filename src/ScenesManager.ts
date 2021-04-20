@@ -13,17 +13,24 @@ module ScenesManager{
     
     export async function handleScenesListRequest(socket : WebSocket, request : Interfaces.Request){
 
-        let list : JSON[] = [];
+        let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);
+        let scenesList : JSON[] = [];
 
-        try {
-//            list  = await DATABASE.select().column('id','name').table("scenes").where('owner', ClientsManager.getEmail(request.token)).orderBy('name', 'asc');
-            list  = await DATABASE.select().column('id','name','description').table("scenes").orderBy('name', 'asc');       // Testing
-            Socket.write(socket, 'scenesListCallback', JSON.stringify(list));
-        }catch(exception){
-            console.log('Error obteniendo la lista de escenas ' + exception )
-            Socket.write(socket, 'scenesListCallback', 'ERROR');
+        if(user != undefined){
+            
+            try {
+                scenesList = await DATABASE.select('id','name','description','shareViewID','shareEditID','shareEditIDExpiration','permissions')
+                .from('shared')
+                .where('userID', '=', user.id)          // Scenes shared with logged user
+                .leftJoin('scenes', 'sceneID', 'id');
+                
+                Socket.write(socket, 'scenesListCallback', JSON.stringify(scenesList));
+            }catch(exception){
+                console.log('Error obteniendo la lista de escenas ' + exception )
+                Socket.write(socket, 'scenesListCallback', 'ERROR');
+            }
+
         }
-
     }
 
 
@@ -34,7 +41,8 @@ module ScenesManager{
             let scene : Interfaces.Scene = JSON.parse(request.content);
 
             if(user != undefined){    
-                await DATABASE.select().table('scenes').insert({owner : user.id , name : scene.name, description : scene.description});
+                let insertedSceneID : string = (await DATABASE.select().table('scenes').insert({name : scene.name, description : scene.description}).returning('id'))[0];   // Insert scene and return generated id
+                await DATABASE.select().table('shared').insert({userID : user.id, sceneID : insertedSceneID, permissions : 'owner'});                                       // Insert shared with user data
                 Socket.write(socket, 'createSceneCallback', 'OK');
             }
             
@@ -65,7 +73,8 @@ module ScenesManager{
     export async function handleDeleteSceneRequest(socket : WebSocket, request : Interfaces.Request){
 
         try{
-            await DATABASE.table('scenes').where('id', request.content).del();
+            await DATABASE.table('scenes').where('id', request.content).del();          // Delete from scenes table
+            await DATABASE.table('shared').where('sceneID', request.content).del();     // Delete from shared table
             Socket.write(socket, 'deleteSceneCallback', 'OK');
         }catch(exception){
             console.log('Error eliminando una escena')
