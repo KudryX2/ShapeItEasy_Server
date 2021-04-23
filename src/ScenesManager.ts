@@ -88,7 +88,7 @@ module ScenesManager{
         let sceneID : string = request.content;
         let clientToken : string = request.token;
                 
-        let scene = await DATABASE.select().column('id','name','owner').table("scenes").where('id', sceneID).first();
+        let scene = await DATABASE.select().column('id','name').table("scenes").where('id', sceneID).first();
         
         if(scene != undefined){     // Check if scene exists
             
