@@ -41,7 +41,7 @@ module ClientsManager{
     }
 
 
-    export async function handleSignInRequest(socket : WebSocket, request : Interfaces.Request){
+    export async function handleSignUpRequest(socket : WebSocket, request : Interfaces.Request){
         
         let credentials : Interfaces.User = JSON.parse(request.content);
 
@@ -51,7 +51,7 @@ module ClientsManager{
             if(insertedUser != null){                           // If user successfuly inserted in db
                 let token = Helper.generateToken(10);
                 usersMap.set(token, insertedUser);    	        // Save the token and user
-                Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
+                Socket.write(socket, 'signUpCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
             }
         }
 

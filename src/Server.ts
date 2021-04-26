@@ -75,8 +75,8 @@ function processNotRestrictedRequest(request : Interfaces.Request, socket : WebS
 	if(request.kind == 'logInRequest')      					// Handle Log In Request 			
 		ClientsManager.handleLogInRequest(socket, request);
 
-	else if(request.kind == 'signInRequest')					// Handle Sign In Request
-		ClientsManager.handleSignInRequest(socket, request);
+	else if(request.kind == 'signUpRequest')					// Handle Sign In Request
+		ClientsManager.handleSignUpRequest(socket, request);
 
 	else 
 		console.log('Tipo de petición no restringida desconocido ' + request.kind);
