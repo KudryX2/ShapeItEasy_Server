@@ -45,7 +45,7 @@ module ClientsManager{
         
         let credentials : Interfaces.User = JSON.parse(request.content);
 
-        if(await checkSignInData(credentials, socket)){          // Check the data
+        if(await checkSignUpData(credentials, socket)){          // Check the data
             let insertedUser : Interfaces.User | null = await UsersManager.insertUser(credentials);      // If everything OK insert user 
 
             if(insertedUser != null){                           // If user successfuly inserted in db
@@ -83,7 +83,7 @@ module ClientsManager{
 
     }
 
-    async function checkSignInData(data : Interfaces.User , socket : WebSocket){
+    async function checkSignUpData(data : Interfaces.User , socket : WebSocket){
 
         if(!Helper.validate(data.name, Helper.DataKind.text)){
             Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Nombre no es valido" }' );
