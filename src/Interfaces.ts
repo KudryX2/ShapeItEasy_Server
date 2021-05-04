@@ -21,6 +21,8 @@ module Interfaces {
         id : string,
         name : string,
         description : string
+        shareViewID : string
+        shareEditID : string
     }
 
 }

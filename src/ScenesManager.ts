@@ -1,6 +1,9 @@
 import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
 import { ClientsManager } from "./ClientsManager";
+import { Session } from "node:inspector";
+import { UsersManager } from "./UsersManager";
+import { Helper } from "./Helper";
 
 
 const DATABASE = require('./database/Database');
@@ -81,6 +84,47 @@ module ScenesManager{
             Socket.write(socket, 'deleteSceneCallback', 'ERROR');
         }
 
+    }
+
+
+    export async function handleAddSceneRequest(socket : WebSocket, request : Interfaces.Request){
+
+        let sceneShareID : string = request.content;
+
+        // Check the user
+        let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);     
+        if(user == undefined){                                               
+            Socket.write(socket, 'addSceneCallback', 'SERVER_ERROR');
+            return;
+        }
+
+        // Check Scene Share ID        
+        if(!Helper.validate(sceneShareID, Helper.DataKind.shareID)){
+            Socket.write(socket, 'addSceneCallback', 'Share ID proporcionado es incorrecto');
+            return;
+        }
+        
+        let scene : Interfaces.Scene = await DATABASE.table('scenes').where('shareEditID', sceneShareID).orWhere('shareViewID', sceneShareID).first();     
+        if(scene == undefined){                     // Given shareID does not exist
+            Socket.write(socket, 'addSceneCallback', 'Share ID proporcionado no existe');
+            return;
+        }
+
+        // Check if the scene is already added for the user
+        let shared = await DATABASE.table('shared').where('userID', user.id).where('sceneID', scene.id).first();
+        if(shared != undefined){                    // Scene already added
+            Socket.write(socket, 'addSceneCallback', 'Esta escena ya ha sido añadida');
+            return;
+        }
+
+        let userPermissions : string = 'view';      // Give view permissions by default
+        if(scene.shareEditID == sceneShareID)       // If ShareEditID equals to given shareID -> edit permissions
+            userPermissions = 'edit';
+
+        // Add scene
+        await DATABASE.select().table('shared').insert({userID : user.id , sceneID : scene.id, permissions : userPermissions});               
+        
+        Socket.write(socket, 'addSceneCallback', 'OK');     
     }
 
 
