@@ -25,6 +25,12 @@ module Interfaces {
         shareEditID : string
     }
 
+    export interface Shared{
+        userID : string,
+        sceneID : string,
+        permissions : string
+    }
+
 }
 
 
