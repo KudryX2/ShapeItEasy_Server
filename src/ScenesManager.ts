@@ -4,6 +4,7 @@ import { ClientsManager } from "./ClientsManager";
 import { Session } from "node:inspector";
 import { UsersManager } from "./UsersManager";
 import { Helper } from "./Helper";
+import { networkInterfaces } from "node:os";
 
 
 const DATABASE = require('./database/Database');
@@ -75,15 +76,24 @@ module ScenesManager{
 
     export async function handleDeleteSceneRequest(socket : WebSocket, request : Interfaces.Request){
 
-        try{
+        let sceneID : string = request.content;
+        let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);
+
+        if(user == undefined){          // Check the user
+            Socket.write(socket, 'addSceneCallback', 'La sesión de usuario ha expirado');
+            return;
+        }
+        let shared : Interfaces.Shared = await DATABASE.table('shared').where('userID', user.id).where('sceneID', sceneID).first();
+
+        if(shared.permissions == 'owner'){                      // Request from owner -> delete scene 
             await DATABASE.table('scenes').where('id', request.content).del();          // Delete from scenes table
             await DATABASE.table('shared').where('sceneID', request.content).del();     // Delete from shared table
-            Socket.write(socket, 'deleteSceneCallback', 'OK');
-        }catch(exception){
-            console.log('Error eliminando una escena')
-            Socket.write(socket, 'deleteSceneCallback', 'ERROR');
-        }
-
+            
+        }else{                                                  // Request from viewer/editor -> stop sharing scene
+            await DATABASE.table('shared').where('sceneID', request.content).andWhere('userID', user.id).del();     // Delete from shared table for the user
+        }        
+    
+        Socket.write(socket, 'deleteSceneCallback', 'OK');
     }
 
 
@@ -94,7 +104,7 @@ module ScenesManager{
         // Check the user
         let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);     
         if(user == undefined){                                               
-            Socket.write(socket, 'addSceneCallback', 'SERVER_ERROR');
+            Socket.write(socket, 'addSceneCallback', 'La sesión de usuario ha expirado');
             return;
         }
 
