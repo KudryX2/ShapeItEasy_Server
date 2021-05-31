@@ -6,32 +6,38 @@ interface SceneInterface{
 
 class Scene{
 
+    id : string;
     name : string;
-    sceneShareViewID : string;
-    sceneShareEditID : string;
 
-    clients : Array<string>;
+    connections : Array<string>;
     
-    constructor(name : string){
+    
+    constructor(id : string, name : string){
+        this.id = id;
         this.name = name;
 
-        this.sceneShareViewID = Helper.generateToken(15);
-        this.sceneShareEditID = Helper.generateToken(15);
-
-        this.clients = new Array<string>();
+        this.connections = new Array<string>();
     }
 
-    addClient(client : string) {
-        
+    addConnection(clientToken : string) : void{
+        this.connections.push(clientToken);
     }
 
-    getJSON() : JSON {
+    removeConnection(clientToken : string) : void{
+        try{
+            this.connections.splice(this.connections.indexOf(clientToken));
+        }catch(exception){
+            console.log('El usuario no estaba conectado a esta escena');
+        }
+    }
 
-        let json : JSON = <JSON><unknown>{
-            'name' : this.name
-        };
+    getConnectionsAmmount() : number {
+        return this.connections.length;
+    }
 
-        return json;
+    printConnections() : void {
+        console.log("Connections : " + this.name + " ");
+        this.connections.forEach((connection : string) => console.log('. ' + connection));
     }
 
 }

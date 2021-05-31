@@ -5,6 +5,7 @@ import { Session } from "node:inspector";
 import { UsersManager } from "./UsersManager";
 import { Helper } from "./Helper";
 import { networkInterfaces } from "node:os";
+import { Scene } from "./Scene";
 
 
 const DATABASE = require('./database/Database');
@@ -12,7 +13,7 @@ const DATABASE = require('./database/Database');
 
 module ScenesManager{
 
-    let connectionsMap : Map<string, Array<string>> = new Map<string, Array<string>>();     // SceneID , List<UserTokens>
+    let activeScenes : Map<string, Scene> = new Map<string, Scene>();                       // SceneID , Scene
 
     
     export async function handleScenesListRequest(socket : WebSocket, request : Interfaces.Request){
@@ -142,21 +143,17 @@ module ScenesManager{
         let sceneID : string = request.content;
         let clientToken : string = request.token;
                 
-        let scene = await DATABASE.select().column('id','name').table("scenes").where('id', sceneID).first();
+        let scene : Interfaces.Scene | undefined = await DATABASE.select().column('id','name').table("scenes").where('id', sceneID).first();
         
         if(scene != undefined){     // Check if scene exists
             
-            let sceneConnections : Array<string> | undefined = connectionsMap.get(sceneID);    // Users connected to the scene
+            if(activeScenes.has(sceneID)){      // Scene already active -> add new connection
+                activeScenes.get(sceneID)?.addConnection(clientToken);
 
-            if(sceneConnections != undefined){          // Existing connections 
-                sceneConnections.push(clientToken);                         // add new connection
-                connectionsMap.set(sceneID, sceneConnections);              // update the connections map
-
-            }else{                                      // No connections
-                let connectionsList : Array<string> = new Array<string>();  // create new connections list
-                connectionsList.push(clientToken);                          // add new connection
-                connectionsMap.set(sceneID, connectionsList);               // add entry to the map
-            
+            }else{                              // Scene wasn´t active -> add active scene and connection
+                let newActiveScene = new Scene(sceneID, scene.name);
+                newActiveScene.addConnection(clientToken);
+                activeScenes.set(sceneID, newActiveScene);
             }
 
             Socket.write(socket, 'connectCallback', 'OK');
@@ -170,51 +167,28 @@ module ScenesManager{
     export async function handleDisconnectRequest(socket : WebSocket, request : Interfaces.Request){
 
         let sceneID : string = request.content;
-        let clientToken : string = request.token;
-        let connectionsList : Array<string> | undefined = connectionsMap.get(sceneID);
-        
-        if(connectionsList != undefined){                           // Check if scene has connections
-            delete connectionsList[connectionsList.indexOf(clientToken)];   // Delete connection from the list
+        let clientToken : string = request.token;        
 
-            if(connectionsList.length == 0)                             // IF connections list empty 
-                connectionsMap.delete(sceneID);                             // Delete map entry 
-            else                                                        // ELSE
-                connectionsMap.set(sceneID, connectionsList);               // Update map entry 
-
+        try{
+            activeScenes.get(sceneID)?.removeConnection(clientToken);       // Remove connection
+    
+            if(activeScenes.get(sceneID)?.getConnectionsAmmount() == 0)     // If scene has no clients -> remove from the list
+                activeScenes.delete(sceneID);
+                
             Socket.write(socket, 'disconnectCallback', 'OK');
-
-        }else
-            Socket.write(socket, 'disconnectCallback', 'La escena no existe');
-
-    }
-
-/*
-    function printConnectionsMap(){             // Testing
-        console.log('mapa de conexiónes');
-        connectionsMap.forEach((value : Array<string> , key : string ) => 
-            value.forEach((value : string) => console.log(value))
-        );
-    }
-*/
-
-    export function deleteConnection(token : string){   // Delete a connection of a specific user
         
-        let stopLooping : boolean = false;
-
-        for(let [sceneID, connectionsList] of connectionsMap){  // For each scene
-
-            for( let connection of connectionsList)             // For each scene connection (token)
-                if(connection == token){                            // Token Found 
-                    delete connectionsList[connectionsList.indexOf(connection)];    // Delete token from the list
-                    connectionsMap.set(sceneID, connectionsList);                   // Update connectionsMap
-                    stopLooping = true;
-                    break;
-                }
-                    
-            if(stopLooping)
-                break;
+        }catch(exception){
+            console.log('Error desconectandose de la escena');
+            Socket.write(socket, 'disconnectCallback', 'ERROR');
         }
 
+    }
+
+
+    function printAllConnections(){
+        console.log('Conexiones')
+
+        activeScenes.forEach((scene : Scene , key : string ) => scene.printConnections());
     }
 
 }
