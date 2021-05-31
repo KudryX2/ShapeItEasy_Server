@@ -51,7 +51,7 @@ module ClientsManager{
             if(insertedUser != null){                           // If user successfuly inserted in db
                 let token = Helper.generateToken(10);
                 usersMap.set(token, insertedUser);    	        // Save the token and user
-                Socket.write(socket, 'signInCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
+                Socket.write(socket, 'signUpCallback', '{ "result" : "success", "message":"' + token + '" }');   // If everything OK answer with a token
             }
         }
 
