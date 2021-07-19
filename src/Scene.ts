@@ -23,12 +23,14 @@ class Scene{
         this.connections.push(clientToken);
     }
 
-    removeConnection(clientToken : string) : void{
-        try{
+    removeConnection(clientToken : string) : boolean{
+
+        if(this.connections.includes(clientToken)){         // If contains connection -> remove connection 
             this.connections.splice(this.connections.indexOf(clientToken));
-        }catch(exception){
-            console.log('El usuario no estaba conectado a esta escena');
+            return true;
         }
+
+        return false;                                       // Return false if no coincidence 
     }
 
     getConnectionsAmmount() : number {

@@ -185,6 +185,18 @@ module ScenesManager{
     }
 
 
+    // Used when user tries to reconnect but didnt close the session properly -> remove old session
+    export async function deleteConnection(clientToken : string ){
+
+        for( let scene of activeScenes.values())        // Loop activeScenes 
+            if(scene.removeConnection(clientToken)){    // if scene contains connection -> remove connection
+                if(scene.getConnectionsAmmount() == 0)  // If scene has no clients -> remove from the list 
+                    activeScenes.delete(scene.id);
+                break;                                  // success -> stop looping 
+            }
+    }
+
+
     function printAllConnections(){
         console.log('Conexiones')
 
