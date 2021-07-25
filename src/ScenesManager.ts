@@ -148,11 +148,11 @@ module ScenesManager{
         if(scene != undefined){     // Check if scene exists
             
             if(activeScenes.has(sceneID)){      // Scene already active -> add new connection
-                activeScenes.get(sceneID)?.addConnection(clientToken);
+                activeScenes.get(sceneID)?.addConnection(clientToken, socket);
 
             }else{                              // Scene wasn´t active -> add active scene and connection
                 let newActiveScene = new Scene(sceneID, scene.name);
-                newActiveScene.addConnection(clientToken);
+                newActiveScene.addConnection(clientToken, socket);
                 activeScenes.set(sceneID, newActiveScene);
             }
 

@@ -13,28 +13,35 @@ class Scene{
     id : string;
     name : string;
 
-    connections : Array<string>;
+//    connections : Array<string>;
     shapes : Array<Shape>;
+    clientSockets : Array<WebSocket>;
+
+    connections : Map<string, WebSocket>;
     
     constructor(id : string, name : string){
         this.id = id;
         this.name = name;
 
-        this.connections = new Array<string>();
+        // this.connections = new Array<string>();
+        this.connections = new Map<string, WebSocket>();
         this.shapes = new Array<Shape>();
+        this.clientSockets = new Array<WebSocket>();
     }
 
     /*
         Connection methods
     */
-    addConnection(clientToken : string) : void{
-        this.connections.push(clientToken);
+    addConnection(clientToken : string, socket : WebSocket) : void{
+        this.connections.set(clientToken, socket);
+
+        this.printConnections();
     }
 
     removeConnection(clientToken : string) : boolean{
 
-        if(this.connections.includes(clientToken)){         // If contains connection -> remove connection 
-            this.connections.splice(this.connections.indexOf(clientToken));
+        if(this.connections.has(clientToken)){         // If contains connection -> remove connection 
+            this.connections.delete(clientToken);
             return true;
         }
 
@@ -42,12 +49,14 @@ class Scene{
     }
 
     getConnectionsAmmount() : number {
-        return this.connections.length;
+        return this.connections.size;
     }
 
     printConnections() : void {
         console.log("Connections : " + this.name + " ");
-        this.connections.forEach((connection : string) => console.log(connection));
+    
+        for( let [token, webSocket] of this.connections)
+            console.log(token);
     }
 
     /*
