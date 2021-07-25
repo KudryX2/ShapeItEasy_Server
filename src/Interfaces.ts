@@ -31,6 +31,14 @@ module Interfaces {
         permissions : string
     }
 
+    export interface AddShapeRequest{
+        shape : string,
+        x : number,
+        y : number,
+        z : number,
+        sceneID : string
+    }
+
 }
 
 

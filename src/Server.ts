@@ -89,6 +89,7 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 	if(request.kind == 'logOutRequest')							// Handle Log Out Request
 		ClientsManager.handleLogOutRequest(socket, request);
 	
+
 	else if(request.kind == 'requestScenesList')				// Handle Scenes Request					
 		ScenesManager.handleScenesListRequest(socket, request);
 
@@ -109,6 +110,11 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 
 	else if(request.kind == 'requestDisconnect')
 		ScenesManager.handleDisconnectRequest(socket, request);
+
+
+	else if(request.kind == 'addShape')							// Handle Scenes Edit Request
+		ScenesManager.handleAddShapeRequest(socket, request);
+
 
 	else                                           				// NOT DEFINED KIND
 		console.log('Tipo de petición desconocido ' + request.kind);

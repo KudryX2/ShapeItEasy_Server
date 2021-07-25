@@ -185,6 +185,21 @@ module ScenesManager{
     }
 
 
+    export async function handleAddShapeRequest(socket : WebSocket, request : Interfaces.Request){
+
+        try{
+            let addShapeRequest : Interfaces.AddShapeRequest  = JSON.parse(request.content);    
+            activeScenes.get(addShapeRequest.sceneID)?.addShape(addShapeRequest);
+        
+            Socket.write(socket, 'addShapeCallback', 'OK');
+
+        }catch(exception){
+            console.log('Error añadiendo una forma a la escena');
+            Socket.write(socket, 'addShapeCallback', 'ERROR');
+        }
+
+    }
+
     // Used when user tries to reconnect but didnt close the session properly -> remove old session
     export async function deleteConnection(clientToken : string ){
 
@@ -198,8 +213,7 @@ module ScenesManager{
 
 
     function printAllConnections(){
-        console.log('Conexiones')
-
+        console.log('Conexiones');
         activeScenes.forEach((scene : Scene , key : string ) => scene.printConnections());
     }
 
