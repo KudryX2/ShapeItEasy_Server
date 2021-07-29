@@ -2,6 +2,7 @@
 
 const FS = require('fs');
 const HTTPS = require('https');
+const HTTP = require('http');
 const WebSocketServer = require('ws').Server;
 
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
@@ -13,11 +14,13 @@ const DECODER = new TextDecoder();
 const DATABASE = require('./database/Database');
 
 
-const SERVER = HTTPS.createServer({					// Server
-	cert: FS.readFileSync('cert/cert.pem'),
-	key: FS.readFileSync('cert/key.pem'),
-	passphrase : 'patopato'
-});
+// const SERVER = HTTPS.createServer({					// Server
+// 	cert: FS.readFileSync('cert/cert.pem'),
+// 	key: FS.readFileSync('cert/key.pem'),
+// 	passphrase : 'patopato'
+// });
+
+const SERVER = HTTP.createServer();
 
 SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
