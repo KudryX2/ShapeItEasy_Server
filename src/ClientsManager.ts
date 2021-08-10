@@ -24,10 +24,10 @@ module ClientsManager{
 
                 for(let [token, user] of usersMap){                 // Check if user already connected from another client
 
-                    if(user.email == userCredentials.email){           // If Connected
+                    if(user.email == userCredentials.email){           // If Connected -> remove old session
                         console.log('Se va a eliminar la sesión antigua');
                         usersMap.delete(token);                             // Delete clientsMap entry
-                        ScenesManager.deleteConnection(token);              // Delete connectionsMap entry (Scenes)
+                        ScenesManager.deleteConnection(token);              // Delete connection from the activeScenes map entry
                         break;
                     }
                 }

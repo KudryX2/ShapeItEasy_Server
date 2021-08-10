@@ -2,6 +2,7 @@
 
 const FS = require('fs');
 const HTTPS = require('https');
+const HTTP = require('http');
 const WebSocketServer = require('ws').Server;
 
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
@@ -13,11 +14,13 @@ const DECODER = new TextDecoder();
 const DATABASE = require('./database/Database');
 
 
-const SERVER = HTTPS.createServer({					// Server
-	cert: FS.readFileSync('cert/cert.pem'),
-	key: FS.readFileSync('cert/key.pem'),
-	passphrase : 'patopato'
-});
+// const SERVER = HTTPS.createServer({					// Server
+// 	cert: FS.readFileSync('cert/cert.pem'),
+// 	key: FS.readFileSync('cert/key.pem'),
+// 	passphrase : 'patopato'
+// });
+
+const SERVER = HTTP.createServer();
 
 SERVER.listen(2323, () => {
 	console.log('WebServer : OK');
@@ -89,6 +92,7 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 	if(request.kind == 'logOutRequest')							// Handle Log Out Request
 		ClientsManager.handleLogOutRequest(socket, request);
 	
+
 	else if(request.kind == 'requestScenesList')				// Handle Scenes Request					
 		ScenesManager.handleScenesListRequest(socket, request);
 
@@ -109,6 +113,11 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 
 	else if(request.kind == 'requestDisconnect')
 		ScenesManager.handleDisconnectRequest(socket, request);
+
+
+	else if(request.kind == 'addShape')							// Handle Scenes Edit Request
+		ScenesManager.handleAddShapeRequest(socket, request);
+
 
 	else                                           				// NOT DEFINED KIND
 		console.log('Tipo de petición desconocido ' + request.kind);
