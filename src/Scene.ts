@@ -4,6 +4,9 @@ import {Interfaces} from "./Interfaces";
 import {Socket} from "./Socket";
 
 
+const DATABASE = require('./database/Database');
+
+
 interface SceneInterface{
     name : string
 }
@@ -62,22 +65,29 @@ class Scene{
     /*
         Shapes Methods
     */
-    addShape(addShapeRequest : Interfaces.AddShapeRequest) : void{
+    async addShape(addShapeRequest : Interfaces.AddShapeRequest){
     
-        let newShape : Shape = new Shape(addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z);
-        this.shapes.push(newShape);
+        try{
 
-        // TODO guardar la figura añadida en la base de datos, hacerlo asincrono
+            let newShape : Shape = new Shape(addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z);
+            this.shapes.push(newShape);
+            
+            await DATABASE.select().table('shapes').insert({kind : addShapeRequest.shape, x : addShapeRequest.x, y : addShapeRequest.y, z : addShapeRequest.z, sizeX : 1, sizeY : 1, sizeZ : 1, sceneID : addShapeRequest.sceneID });
+    
+            let addedShapeInfo : JSON = <JSON><unknown>{
+                "action" : "added",
+                "shape" : addShapeRequest.shape,
+                "x" : addShapeRequest.x,
+                "y" : addShapeRequest.y,
+                "z" : addShapeRequest.z
+            };
+    
+            this.broadcastMessage('sceneUpdate' , JSON.stringify(addedShapeInfo));
 
-        let addedShapeInfo : JSON = <JSON><unknown>{
-            "action" : "added",
-            "shape" : addShapeRequest.shape,
-            "x" : addShapeRequest.x,
-            "y" : addShapeRequest.y,
-            "z" : addShapeRequest.z
-        };
+        }catch(exception){
+            console.log('Error añadiendo una figura a la escena ' + exception);
+        }
 
-        this.broadcastMessage('sceneUpdate' , JSON.stringify(addedShapeInfo));
     }
 
     printShapesList() : void {
