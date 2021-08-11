@@ -146,20 +146,25 @@ module ScenesManager{
         let scene : Interfaces.Scene | undefined = await DATABASE.select().column('id','name').table("scenes").where('id', sceneID).first();
         
         if(scene != undefined){     // Check if scene exists
+
+            let shapesInfo : string | undefined;
             
             if(activeScenes.has(sceneID)){      // Scene already active -> add new connection
                 activeScenes.get(sceneID)?.addConnection(clientToken, socket);
+                shapesInfo = activeScenes.get(sceneID)?.getShapesInfo();
 
             }else{                              // Scene wasn´t active -> add active scene and connection
                 let newActiveScene = new Scene(sceneID, scene.name);
+                await newActiveScene.loadShapes();
+                shapesInfo = newActiveScene.getShapesInfo();
                 newActiveScene.addConnection(clientToken, socket);
                 activeScenes.set(sceneID, newActiveScene);
             }
 
-            Socket.write(socket, 'connectCallback', 'OK');
+            Socket.write(socket, 'connectCallback', '{ "status" : "OK" , "info" : "' + shapesInfo?.toString() + '" }');
 
         }else
-            Socket.write(socket, 'connectCallback', 'La escena no existe');   
+            Socket.write(socket, 'connectCallback', '{ "status" : "Error" }');   
     
     }
 

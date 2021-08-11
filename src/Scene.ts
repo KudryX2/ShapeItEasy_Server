@@ -90,9 +90,24 @@ class Scene{
 
     }
 
+    async loadShapes(){
+        let sceneShapes : Interfaces.Shape[] | undefined = await DATABASE.select().table("shapes").where('sceneID', this.id);
+
+        if(sceneShapes != undefined)
+            for(let i = 0 ; i < sceneShapes.length ; ++i)
+                this.shapes.push(new Shape(sceneShapes[i].kind, sceneShapes[i].x, sceneShapes[i].y, sceneShapes[i].z))
+
+    }
+
+    getShapesInfo() : string {
+        let infoArray : JSON[] = [];
+        this.shapes.forEach((shape : Shape) => infoArray.push(shape.getJSON()));
+        return JSON.stringify(infoArray).split('"').join('\'');
+    }
+
     printShapesList() : void {
         console.log("Shapes : " + this.name + " ");
-        this.shapes.forEach((shape : Shape) => console.log(shape.name + ' ' + shape.x + ' ' + shape.y + ' ' + shape.z));
+        this.shapes.forEach((shape : Shape) => console.log(shape.kind + ' ' + shape.x + ' ' + shape.y + ' ' + shape.z));
     }
 }
 
