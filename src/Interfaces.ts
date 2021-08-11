@@ -39,6 +39,17 @@ module Interfaces {
         sceneID : string
     }
 
+    export interface Shape{
+        kind : string,
+        x : number,
+        y : number,
+        z : number,
+        sizeX : number,
+        sizeY : number,
+        sizeZ : number,
+        sceneID : string
+    }
+
 }
 
 
