@@ -6,6 +6,7 @@ import { UsersManager } from "./UsersManager";
 import { Helper } from "./Helper";
 import { networkInterfaces } from "node:os";
 import { Scene } from "./Scene";
+import { Console } from "node:console";
 
 
 const DATABASE = require('./database/Database');
@@ -204,6 +205,14 @@ module ScenesManager{
         }
 
     }
+
+
+    export async function handleUpdateShapeRequest(socket : WebSocket, request : Interfaces.Request){
+        console.log(request.content);
+        // TODO actualizar base datos
+        // TODO broadcast message de la actualización
+    }
+
 
     // Used when user tries to reconnect but didnt close the session properly -> remove old session
     export async function deleteConnection(clientToken : string ){
