@@ -40,6 +40,7 @@ module Interfaces {
     }
 
     export interface Shape{
+        id : string,
         kind : string,
         x : number,
         y : number,

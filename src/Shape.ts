@@ -1,11 +1,13 @@
 class Shape{
 
+    id : string;
     kind : string;
     x : number;
     y : number;
     z : number;
 
-    constructor(kind : string, x : number, y : number, z : number){
+    constructor(id : string, kind : string, x : number, y : number, z : number){
+        this.id = id;
         this.kind = kind;
         this.x = x;
         this.y = y;
@@ -13,7 +15,7 @@ class Shape{
     }
 
     public getJSON() : JSON{
-        return <JSON><unknown>{'kind' : this.kind, 'x' : this.x, 'y' : this.y, 'z' : this.z};
+        return <JSON><unknown>{'id' : this.id, 'kind' : this.kind, 'x' : this.x, 'y' : this.y, 'z' : this.z};
     }
 
 }

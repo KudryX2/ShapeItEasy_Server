@@ -69,19 +69,20 @@ class Scene{
     
         try{
 
-            let newShape : Shape = new Shape(addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z);
-            this.shapes.push(newShape);
+            let insertedShapeID : string = await DATABASE.select().table('shapes').insert({kind : addShapeRequest.shape, x : addShapeRequest.x, y : addShapeRequest.y, z : addShapeRequest.z, sizeX : 1, sizeY : 1, sizeZ : 1, sceneID : addShapeRequest.sceneID }).returning('id');
             
-            await DATABASE.select().table('shapes').insert({kind : addShapeRequest.shape, x : addShapeRequest.x, y : addShapeRequest.y, z : addShapeRequest.z, sizeX : 1, sizeY : 1, sizeZ : 1, sceneID : addShapeRequest.sceneID });
-    
             let addedShapeInfo : JSON = <JSON><unknown>{
                 "action" : "added",
+                "id" : insertedShapeID,
                 "shape" : addShapeRequest.shape,
                 "x" : addShapeRequest.x,
                 "y" : addShapeRequest.y,
                 "z" : addShapeRequest.z
             };
-    
+
+            let newShape : Shape = new Shape(insertedShapeID, addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z);
+            this.shapes.push(newShape);
+            
             this.broadcastMessage('sceneUpdate' , JSON.stringify(addedShapeInfo));
 
         }catch(exception){
@@ -95,7 +96,7 @@ class Scene{
 
         if(sceneShapes != undefined)
             for(let i = 0 ; i < sceneShapes.length ; ++i)
-                this.shapes.push(new Shape(sceneShapes[i].kind, sceneShapes[i].x, sceneShapes[i].y, sceneShapes[i].z))
+                this.shapes.push(new Shape(sceneShapes[i].id, sceneShapes[i].kind, sceneShapes[i].x, sceneShapes[i].y, sceneShapes[i].z))
 
     }
 
