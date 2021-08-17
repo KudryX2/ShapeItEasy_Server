@@ -208,9 +208,18 @@ module ScenesManager{
 
 
     export async function handleUpdateShapeRequest(socket : WebSocket, request : Interfaces.Request){
-        console.log(request.content);
-        // TODO actualizar base datos
-        // TODO broadcast message de la actualización
+        
+        try{
+            let updateShapeRequest : Interfaces.UpdateShapeRequest = JSON.parse(request.content);
+            activeScenes.get(updateShapeRequest.sceneID)?.updateShape(updateShapeRequest);
+            
+            Socket.write(socket, 'updateShapeCallback', 'OK');   
+                    
+        }catch(exception){
+            console.log('Error actualizando una forma en la escena ' + exception);
+            Socket.write(socket, 'updateShapeCallback', 'ERROR');
+        }
+
     }
 
 
