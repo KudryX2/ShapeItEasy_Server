@@ -6,6 +6,7 @@ import { UsersManager } from "./UsersManager";
 import { Helper } from "./Helper";
 import { networkInterfaces } from "node:os";
 import { Scene } from "./Scene";
+import { Console } from "node:console";
 
 
 const DATABASE = require('./database/Database');
@@ -204,6 +205,23 @@ module ScenesManager{
         }
 
     }
+
+
+    export async function handleUpdateShapeRequest(socket : WebSocket, request : Interfaces.Request){
+        
+        try{
+            let updateShapeRequest : Interfaces.UpdateShapeRequest = JSON.parse(request.content);
+            activeScenes.get(updateShapeRequest.sceneID)?.updateShape(updateShapeRequest);
+            
+            Socket.write(socket, 'updateShapeCallback', 'OK');   
+                    
+        }catch(exception){
+            console.log('Error actualizando una forma en la escena ' + exception);
+            Socket.write(socket, 'updateShapeCallback', 'ERROR');
+        }
+
+    }
+
 
     // Used when user tries to reconnect but didnt close the session properly -> remove old session
     export async function deleteConnection(clientToken : string ){

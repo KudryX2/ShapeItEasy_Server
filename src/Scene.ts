@@ -69,19 +69,30 @@ class Scene{
     
         try{
 
-            let newShape : Shape = new Shape(addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z);
-            this.shapes.push(newShape);
-            
-            await DATABASE.select().table('shapes').insert({kind : addShapeRequest.shape, x : addShapeRequest.x, y : addShapeRequest.y, z : addShapeRequest.z, sizeX : 1, sizeY : 1, sizeZ : 1, sceneID : addShapeRequest.sceneID });
-    
+            let insertedShapeID : string = (await DATABASE.select().table('shapes').insert({kind : addShapeRequest.shape, x : addShapeRequest.x, y : addShapeRequest.y, z : addShapeRequest.z, sx : 1, sy : 1, sz : 1, rx : 0, ry : 0, rz : 0, sceneID : addShapeRequest.sceneID }).returning('id'))[0];
+
             let addedShapeInfo : JSON = <JSON><unknown>{
                 "action" : "added",
+                "id" : insertedShapeID,
                 "shape" : addShapeRequest.shape,
                 "x" : addShapeRequest.x,
                 "y" : addShapeRequest.y,
-                "z" : addShapeRequest.z
+                "z" : addShapeRequest.z,
+                
+                "sx" : 1,
+                "sy" : 1,
+                "sz" : 1,
+
+                "rx" : 0,
+                "ry" : 0,
+                "rz" : 0
             };
-    
+
+            let newShape : Shape = new Shape(insertedShapeID, addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z, 1, 1, 1, 0, 0, 0);
+            this.shapes.push(newShape);
+
+            console.log(JSON.stringify(addedShapeInfo));
+            
             this.broadcastMessage('sceneUpdate' , JSON.stringify(addedShapeInfo));
 
         }catch(exception){
@@ -95,7 +106,49 @@ class Scene{
 
         if(sceneShapes != undefined)
             for(let i = 0 ; i < sceneShapes.length ; ++i)
-                this.shapes.push(new Shape(sceneShapes[i].kind, sceneShapes[i].x, sceneShapes[i].y, sceneShapes[i].z))
+                this.shapes.push(new Shape(sceneShapes[i].id, sceneShapes[i].kind, sceneShapes[i].x, sceneShapes[i].y, sceneShapes[i].z, sceneShapes[i].sx, sceneShapes[i].sy, sceneShapes[i].sz, sceneShapes[i].rx, sceneShapes[i].ry, sceneShapes[i].rz));
+
+    }
+
+    async updateShape(updateShapeRequest : Interfaces.UpdateShapeRequest){
+
+        try{
+            // Update DB
+            await DATABASE.select().table('shapes').update({x  : updateShapeRequest.position.x, y  : updateShapeRequest.position.y, z : updateShapeRequest.position.z, 
+                                                            sx : updateShapeRequest.scale.x,    sy : updateShapeRequest.scale.y,    sz : updateShapeRequest.scale.z,
+                                                            rx : updateShapeRequest.rotation.x, ry : updateShapeRequest.rotation.y, rz : updateShapeRequest.rotation.z,
+                                                        }).where('id', updateShapeRequest.shapeID);
+
+            // Update array                                
+            for(let i = 0 ; i < this.shapes.length ; ++i)
+                if(this.shapes[i].id == updateShapeRequest.shapeID){
+                    this.shapes[i].update(updateShapeRequest);
+                    break;
+                }
+
+            // Broadcast message with updated info
+            let updatedShape : JSON = <JSON><unknown>{
+                "action" : "updated",
+                "id" : updateShapeRequest.shapeID,
+
+                "x" : updateShapeRequest.position.x,
+                "y" : updateShapeRequest.position.y,
+                "z" : updateShapeRequest.position.z,
+                
+                "sx" : updateShapeRequest.scale.x,
+                "sy" : updateShapeRequest.scale.y,
+                "sz" : updateShapeRequest.scale.z,
+
+                "rx" : updateShapeRequest.rotation.x,
+                "ry" : updateShapeRequest.rotation.y,
+                "rz" : updateShapeRequest.rotation.z
+            };
+
+            this.broadcastMessage('sceneUpdate',  JSON.stringify(updatedShape));
+
+        }catch(exception){
+            console.log('Error actualizando una figura en la base de datos ' + exception);
+        }
 
     }
 

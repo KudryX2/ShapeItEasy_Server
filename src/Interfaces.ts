@@ -1,3 +1,5 @@
+import { NumericLiteral } from "typescript";
+
 module Interfaces {
 
     export interface Request{                                                     
@@ -40,13 +42,36 @@ module Interfaces {
     }
 
     export interface Shape{
+        id : string,
         kind : string,
-        x : number,
+        
+        x : number,     // Position
         y : number,
         z : number,
-        sizeX : number,
-        sizeY : number,
-        sizeZ : number,
+
+        sx : number,    // Scale
+        sy : number,
+        sz : number,
+
+        rx : number,    // Rotation
+        ry : number,
+        rz : number,
+
+        sceneID : string
+    }
+
+    interface Vector3{
+        x : number, 
+        y : number,
+        z : number
+    }
+
+    export interface UpdateShapeRequest{
+        shapeID : string,
+        position : Vector3,
+        scale : Vector3,
+        rotation : Vector3,
+
         sceneID : string
     }
 
