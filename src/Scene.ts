@@ -90,8 +90,6 @@ class Scene{
 
             let newShape : Shape = new Shape(insertedShapeID, addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z, 1, 1, 1, 0, 0, 0);
             this.shapes.push(newShape);
-
-            console.log(JSON.stringify(addedShapeInfo));
             
             this.broadcastMessage('sceneUpdate' , JSON.stringify(addedShapeInfo));
 
@@ -147,10 +145,22 @@ class Scene{
             this.broadcastMessage('sceneUpdate',  JSON.stringify(updatedShape));
 
         }catch(exception){
-            console.log('Error actualizando una figura en la base de datos ' + exception);
+            console.log('Error actualizando una forma en la base de datos ' + exception);
         }
 
     }
+
+    async deleteShape(shapeID : string){
+        
+        try{
+            await DATABASE.select().table('shapes').delete().where('id', shapeID);
+            this.broadcastMessage('sceneUpdate',  JSON.stringify(<JSON><unknown>{ "action" : "deleted", "id" : shapeID }));
+        }catch(exception){
+            console.log('Error eliminando una forma en la base de datos ' + exception);
+        }
+
+    }
+
 
     getShapesInfo() : string {
         let infoArray : JSON[] = [];

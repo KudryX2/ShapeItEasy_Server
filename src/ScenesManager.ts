@@ -222,6 +222,17 @@ module ScenesManager{
 
     }
 
+    export async function handleDeleteShapeRequest(socket : WebSocket, request : Interfaces.Request) {
+        
+        try{
+            let deleteShapeRequest : Interfaces.DeleteShapeRequest = JSON.parse(request.content);
+            activeScenes.get(deleteShapeRequest.sceneID)?.deleteShape(deleteShapeRequest.shapeID);
+        }catch(exception){
+            console.log('Error eliminando una forma de la escena : ' + exception);
+        }
+
+    }
+
 
     // Used when user tries to reconnect but didnt close the session properly -> remove old session
     export async function deleteConnection(clientToken : string ){

@@ -121,6 +121,9 @@ function processRestrictedRequest(request : Interfaces.Request, socket : WebSock
 	else if(request.kind == 'updateShape')
 		ScenesManager.handleUpdateShapeRequest(socket, request);
 
+	else if(request.kind == 'deleteShape')
+		ScenesManager.handleDeleteShapeRequest(socket, request);
+
 	else                                           				// NOT DEFINED KIND
 		console.log('Tipo de petición desconocido ' + request.kind);
 

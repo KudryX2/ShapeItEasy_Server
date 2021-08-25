@@ -33,14 +33,6 @@ module Interfaces {
         permissions : string
     }
 
-    export interface AddShapeRequest{
-        shape : string,
-        x : number,
-        y : number,
-        z : number,
-        sceneID : string
-    }
-
     export interface Shape{
         id : string,
         kind : string,
@@ -66,12 +58,25 @@ module Interfaces {
         z : number
     }
 
+    export interface AddShapeRequest{
+        shape : string,
+        x : number,
+        y : number,
+        z : number,
+        sceneID : string
+    }
+
     export interface UpdateShapeRequest{
         shapeID : string,
         position : Vector3,
         scale : Vector3,
         rotation : Vector3,
 
+        sceneID : string
+    }
+
+    export interface DeleteShapeRequest{
+        shapeID : string,
         sceneID : string
     }
 
