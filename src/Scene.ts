@@ -68,16 +68,17 @@ class Scene{
     async addShape(addShapeRequest : Interfaces.AddShapeRequest){
     
         try{
+            let position : Interfaces.Vector3 = addShapeRequest.position;
 
-            let insertedShapeID : string = (await DATABASE.select().table('shapes').insert({kind : addShapeRequest.shape, x : addShapeRequest.x, y : addShapeRequest.y, z : addShapeRequest.z, sx : 1, sy : 1, sz : 1, rx : 0, ry : 0, rz : 0, sceneID : addShapeRequest.sceneID }).returning('id'))[0];
+            let insertedShapeID : string = (await DATABASE.select().table('shapes').insert({kind : addShapeRequest.shape, x : position.x, y : position.y, z : position.z, sx : 1, sy : 1, sz : 1, rx : 0, ry : 0, rz : 0, sceneID : addShapeRequest.sceneID }).returning('id'))[0];
 
             let addedShapeInfo : JSON = <JSON><unknown>{
                 "action" : "added",
                 "id" : insertedShapeID,
                 "shape" : addShapeRequest.shape,
-                "x" : addShapeRequest.x,
-                "y" : addShapeRequest.y,
-                "z" : addShapeRequest.z,
+                "x" : position.x,
+                "y" : position.y,
+                "z" : position.z,
                 
                 "sx" : 1,
                 "sy" : 1,
@@ -88,10 +89,8 @@ class Scene{
                 "rz" : 0
             };
 
-            let newShape : Shape = new Shape(insertedShapeID, addShapeRequest.shape, addShapeRequest.x, addShapeRequest.y, addShapeRequest.z, 1, 1, 1, 0, 0, 0);
+            let newShape : Shape = new Shape(insertedShapeID, addShapeRequest.shape, position.x, position.y, position.z, 1, 1, 1, 0, 0, 0);
             this.shapes.push(newShape);
-
-            console.log(JSON.stringify(addedShapeInfo));
             
             this.broadcastMessage('sceneUpdate' , JSON.stringify(addedShapeInfo));
 
@@ -113,10 +112,14 @@ class Scene{
     async updateShape(updateShapeRequest : Interfaces.UpdateShapeRequest){
 
         try{
+            let position : Interfaces.Vector3 = updateShapeRequest.position;
+            let scale : Interfaces.Vector3 = updateShapeRequest.scale;
+            let rotation : Interfaces.Vector3 = updateShapeRequest.rotation;
+
             // Update DB
-            await DATABASE.select().table('shapes').update({x  : updateShapeRequest.position.x, y  : updateShapeRequest.position.y, z : updateShapeRequest.position.z, 
-                                                            sx : updateShapeRequest.scale.x,    sy : updateShapeRequest.scale.y,    sz : updateShapeRequest.scale.z,
-                                                            rx : updateShapeRequest.rotation.x, ry : updateShapeRequest.rotation.y, rz : updateShapeRequest.rotation.z,
+            await DATABASE.select().table('shapes').update({x  : position.x, y  : position.y, z : position.z, 
+                                                            sx : scale.x,    sy : scale.y,    sz : scale.z,
+                                                            rx : rotation.x, ry : rotation.y, rz : rotation.z,
                                                         }).where('id', updateShapeRequest.shapeID);
 
             // Update array                                
@@ -131,26 +134,38 @@ class Scene{
                 "action" : "updated",
                 "id" : updateShapeRequest.shapeID,
 
-                "x" : updateShapeRequest.position.x,
-                "y" : updateShapeRequest.position.y,
-                "z" : updateShapeRequest.position.z,
+                "x" : position.x,
+                "y" : position.y,
+                "z" : position.z,
                 
-                "sx" : updateShapeRequest.scale.x,
-                "sy" : updateShapeRequest.scale.y,
-                "sz" : updateShapeRequest.scale.z,
+                "sx" : scale.x,
+                "sy" : scale.y,
+                "sz" : scale.z,
 
-                "rx" : updateShapeRequest.rotation.x,
-                "ry" : updateShapeRequest.rotation.y,
-                "rz" : updateShapeRequest.rotation.z
+                "rx" : rotation.x,
+                "ry" : rotation.y,
+                "rz" : rotation.z
             };
 
             this.broadcastMessage('sceneUpdate',  JSON.stringify(updatedShape));
 
         }catch(exception){
-            console.log('Error actualizando una figura en la base de datos ' + exception);
+            console.log('Error actualizando la forma ' + updateShapeRequest.shapeID + ' en la base de datos : ' + exception);
         }
 
     }
+
+    async deleteShape(shapeID : string){
+        
+        try{
+            await DATABASE.select().table('shapes').delete().where('id', shapeID);
+            this.broadcastMessage('sceneUpdate',  JSON.stringify(<JSON><unknown>{ "action" : "deleted", "id" : shapeID }));
+        }catch(exception){
+            console.log('Error eliminando una forma en la base de datos ' + exception);
+        }
+
+    }
+
 
     getShapesInfo() : string {
         let infoArray : JSON[] = [];
