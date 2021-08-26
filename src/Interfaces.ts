@@ -52,7 +52,7 @@ module Interfaces {
         sceneID : string
     }
 
-    interface Vector3{
+    export interface Vector3{
         x : number, 
         y : number,
         z : number
@@ -60,9 +60,7 @@ module Interfaces {
 
     export interface AddShapeRequest{
         shape : string,
-        x : number,
-        y : number,
-        z : number,
+        position : Vector3
         sceneID : string
     }
 
