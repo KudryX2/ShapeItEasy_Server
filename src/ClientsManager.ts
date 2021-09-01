@@ -41,11 +41,11 @@ module ClientsManager{
     }
 
 
-    export async function handleSignInRequest(socket : WebSocket, request : Interfaces.Request){
+    export async function handleSignUpRequest(socket : WebSocket, request : Interfaces.Request){
         
         let credentials : Interfaces.User = JSON.parse(request.content);
 
-        if(await checkSignInData(credentials, socket)){          // Check the data
+        if(await checkSignUpData(credentials, socket)){          // Check the data
             let insertedUser : Interfaces.User | null = await UsersManager.insertUser(credentials);      // If everything OK insert user 
 
             if(insertedUser != null){                           // If user successfuly inserted in db
@@ -83,26 +83,26 @@ module ClientsManager{
 
     }
 
-    async function checkSignInData(data : Interfaces.User , socket : WebSocket){
+    async function checkSignUpData(data : Interfaces.User , socket : WebSocket){
 
         if(!Helper.validate(data.name, Helper.DataKind.text)){
-            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Nombre no es valido" }' );
+            Socket.write(socket, 'signUpCallback', '{ "result" : "error" , "message" : "Nombre no es valido" }' );
             return false;
         } 
 
         if(!Helper.validate(data.email, Helper.DataKind.email)){
-            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Email no es válido" }' );
+            Socket.write(socket, 'signUpCallback', '{ "result" : "error" , "message" : "Email no es válido" }' );
             return false;
         }
 
         if(!Helper.validate(data.password, Helper.DataKind.text)){
-            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Contraseña no es valida" }' );
+            Socket.write(socket, 'signUpCallback', '{ "result" : "error" , "message" : "Contraseña no es valida" }' );
             return false;
         }
     
 
         if(await UsersManager.getUser(data.email) != null){                   
-            Socket.write(socket, 'signInCallback', '{ "result" : "error" , "message" : "Usuario ya existe" }' );
+            Socket.write(socket, 'signUpCallback', '{ "result" : "error" , "message" : "Usuario ya existe" }' );
             return false;
         }
 
