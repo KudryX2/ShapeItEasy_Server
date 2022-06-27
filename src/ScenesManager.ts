@@ -82,7 +82,7 @@ module ScenesManager{
         let user : Interfaces.User | undefined = ClientsManager.getUser(request.token);
 
         if(user == undefined){          // Check the user
-            Socket.write(socket, 'addSceneCallback', 'La sesión de usuario ha expirado');
+            Socket.write(socket, 'deleteSceneCallback', 'La sesión de usuario ha expirado');
             return;
         }
         let shared : Interfaces.Shared = await DATABASE.table('shared').where('userID', user.id).where('sceneID', sceneID).first();
