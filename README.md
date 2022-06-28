@@ -47,4 +47,7 @@ PostgreSQL (cliente base de datos)	https://www.npmjs.com/package/pg
 Encriptación para las contraseñas de la base de datos	https://www.npmjs.com/package/bcrypt	
 
 	npm i bcrypt
+	
+https://www.npmjs.com/package/os-utils		Monitor recursos del sistema
+	npm install os-utils
 
