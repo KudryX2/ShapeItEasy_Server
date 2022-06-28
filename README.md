@@ -48,6 +48,7 @@ Encriptación para las contraseñas de la base de datos	https://www.npmjs.com/pa
 
 	npm i bcrypt
 	
-https://www.npmjs.com/package/os-utils		Monitor recursos del sistema
+Monitor recursos del sistema 				https://www.npmjs.com/package/os-utils		
+
 	npm install os-utils
 
