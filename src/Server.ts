@@ -9,6 +9,9 @@ import {Interfaces} from "./Interfaces";			// Requests interfaces, used for pars
 import {ScenesManager} from "./ScenesManager";
 import {ClientsManager} from "./ClientsManager";
 
+import {Monitor} from "./tests/Monitor";
+
+// Monitor.startMonitor();
 
 const DECODER = new TextDecoder();
 const DATABASE = require('./database/Database');
@@ -57,7 +60,7 @@ function processRequest(data : BufferSource, socket : WebSocket) : void{
 
 	if(parseOK){										// If parsed handle the request	
 		
-		console.log("Request : " + request.kind);
+		// console.log("Request : " + request.kind);
 
 		if(request.token == '')											// No token -> Not restricted requests
 			processNotRestrictedRequest(request, socket);
