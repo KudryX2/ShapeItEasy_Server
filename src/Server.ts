@@ -8,6 +8,7 @@ const WebSocketServer = require('ws').Server;
 import {Interfaces} from "./Interfaces";			// Requests interfaces, used for parsing
 import {ScenesManager} from "./ScenesManager";
 import {ClientsManager} from "./ClientsManager";
+import {Socket} from "./Socket";
 
 import {Monitor} from "./tests/Monitor";
 
@@ -83,6 +84,9 @@ function processNotRestrictedRequest(request : Interfaces.Request, socket : WebS
 
 	else if(request.kind == 'signUpRequest')					// Handle Sign In Request
 		ClientsManager.handleSignUpRequest(socket, request);
+
+	else if(request.kind == 'pingRequest')						// Handle Ping Request
+		Socket.write(socket, 'pingRequestCallback', 'OK');   
 
 	else 
 		console.log('Tipo de petición no restringida desconocido ' + request.kind);
